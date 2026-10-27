@@ -1,0 +1,8 @@
+{
+  "source": "actual App.tsx export render block",
+  "positive_mask_pixels": 13761,
+  "all_black_opaque": true,
+  "unmasked_alpha": 128,
+  "historical_pass_negative_control": "reproduced source pixel disclosure",
+  "native_runtime": false
+}

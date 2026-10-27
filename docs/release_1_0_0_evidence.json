@@ -1,0 +1,198 @@
+{
+  "version": "1.0.0",
+  "state": "public_verified",
+  "tag": "v1.0.0",
+  "sha": "e6edf14c99e224b6d755f3c66466ba6a87352961",
+  "build_run_id": 40475261551,
+  "local_checks": {
+    "frontend": "pass",
+    "rust_tagged": 4,
+    "rust_extended_test_only": 9,
+    "node": 17
+  },
+  "native_qa": {
+    "platform": "macos_silicon",
+    "sdk": "27.0",
+    "bundle_launch": true,
+    "open_fixture_png": true,
+    "dimensions": "640x400",
+    "canvas_annotations_and_save": "not verified: CUA noWindowsAvailable; covered by actual React integration with fixture bridge, not nativeIPC",
+    "private_clipboard_read": false,
+    "temporary_settings_restore": "restored original absent config; QA bundle process exited"
+  },
+  "engine_profile": {
+    "macos": "shared Rust clipboard/file engine",
+    "windows": "shared Rust clipboard/file engine, not dummy"
+  },
+  "ci_recovery": [
+    {
+      "attempt": 1,
+      "failure": "Intel hdiutil create Resource busy after successful compile",
+      "action": "rerun failed job same tag, no code changes"
+    }
+  ],
+  "ci_attempt": 2,
+  "signature_checks": {
+    "version": "1.0.0",
+    "verified": [
+      {
+        "platform": "windows-x86_64",
+        "name": "vxshot_1.0.0_windows_x64_setup.exe",
+        "size": 3552313,
+        "sha256": "ef492582aa6d10533af9b39e5a40ca202bab3b9406b29dd0aac5cb2b22a363e4",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "windows-x86_64-nsis",
+        "name": "vxshot_1.0.0_windows_x64_setup.exe",
+        "size": 3552313,
+        "sha256": "ef492582aa6d10533af9b39e5a40ca202bab3b9406b29dd0aac5cb2b22a363e4",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-aarch64",
+        "name": "vxshot_1.0.0_macos_silicon.app.tar.gz",
+        "size": 5890430,
+        "sha256": "2d7ffc3220a123d5172f670f2398dc00a4e4a1b51b6717255c4815aead5829c8",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-aarch64-app",
+        "name": "vxshot_1.0.0_macos_silicon.app.tar.gz",
+        "size": 5890430,
+        "sha256": "2d7ffc3220a123d5172f670f2398dc00a4e4a1b51b6717255c4815aead5829c8",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-x86_64",
+        "name": "vxshot_1.0.0_macos_intel.app.tar.gz",
+        "size": 6237699,
+        "sha256": "7a632a53d02d8bc1ae86b98a4d935e59d2ac6f2eeb43b353ff84ba81769b61a7",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-x86_64-app",
+        "name": "vxshot_1.0.0_macos_intel.app.tar.gz",
+        "size": 6237699,
+        "sha256": "7a632a53d02d8bc1ae86b98a4d935e59d2ac6f2eeb43b353ff84ba81769b61a7",
+        "signature": true,
+        "tamper_rejected": true
+      }
+    ]
+  },
+  "package_icons": [
+    {
+      "platform": "macos_silicon",
+      "version": "1.0.0",
+      "identifier": "com.vxshot.desktop",
+      "architecture": "0x100000c",
+      "sdk": "27.0",
+      "icns_sha256": "c04d24dd3123f00d9d657a4e5a30b428215c36d56b8dda7f4409537e64709c30",
+      "icon_matches": true,
+      "strict_codesign": true
+    },
+    {
+      "platform": "windows_x64",
+      "executable": "vxshot.exe",
+      "pe_machine": "AMD64",
+      "version_resource_contains": "1.0.0",
+      "icon_payloads": 7,
+      "icon_matches": true,
+      "ico_sha256": "80d5f44d7f91fcb86ad8dce6e785f1cc8b41eef24c859e8482ac7c4a94d246b4"
+    },
+    {
+      "platform": "macos_intel",
+      "version": "1.0.0",
+      "identifier": "com.vxshot.desktop",
+      "architecture": "0x1000007",
+      "sdk": "27.0",
+      "icns_sha256": "c04d24dd3123f00d9d657a4e5a30b428215c36d56b8dda7f4409537e64709c30",
+      "icon_matches": true,
+      "strict_codesign": true
+    }
+  ],
+  "dmg_checks": [
+    {
+      "platform": "macos_silicon",
+      "checksum": "VALID",
+      "dmg_icns_matches": true,
+      "identifier": "com.vxshot.desktop",
+      "version": "1.0.0",
+      "strict_codesign": true
+    },
+    {
+      "platform": "macos_intel",
+      "checksum": "VALID",
+      "dmg_icns_matches": true,
+      "identifier": "com.vxshot.desktop",
+      "version": "1.0.0",
+      "strict_codesign": true
+    }
+  ],
+  "dom_checks": {
+    "actual_react_app": true,
+    "bridge": "fixture mocks, not native IPC",
+    "startup_reads": 1,
+    "annotation_survives_focus_and_shortcut": true,
+    "annotation_history_survives_save_dialog_focus": true,
+    "unsaved_blocks_updater": true,
+    "export_png_bytes": 3524,
+    "native_runtime": false
+  },
+  "raster_checks": {
+    "source": "actual App.tsx export render block",
+    "positive_mask_pixels": 13761,
+    "all_black_opaque": true,
+    "unmasked_alpha": 128,
+    "historical_pass_negative_control": "reproduced source pixel disclosure",
+    "native_runtime": false
+  },
+  "historical_focus_negative_control": "actual e9e8abc App source reproduces focus read/reset and lost history",
+  "release_id": 425203740,
+  "release_url": "https://github.com/linhbv94/VXShot/releases/tag/v1.0.0",
+  "public_manifest_exact": true,
+  "public_assets": [
+    {
+      "name": "latest.json",
+      "status": 200,
+      "size": 5010,
+      "sha256": "7a14575af2893b8890a8184403769d7effc06721839bad8fad1943649e60987e"
+    },
+    {
+      "name": "vxshot_1.0.0_macos_intel.app.tar.gz",
+      "status": 200,
+      "size": 6237699,
+      "sha256": "7a632a53d02d8bc1ae86b98a4d935e59d2ac6f2eeb43b353ff84ba81769b61a7"
+    },
+    {
+      "name": "vxshot_1.0.0_macos_intel.dmg",
+      "status": 200,
+      "size": 6822814,
+      "sha256": "30ac4e2e331db8fd05d4d2acb3cfdcbf6ef6a8804ad310e98cacdec337ef9001"
+    },
+    {
+      "name": "vxshot_1.0.0_macos_silicon.app.tar.gz",
+      "status": 200,
+      "size": 5890430,
+      "sha256": "2d7ffc3220a123d5172f670f2398dc00a4e4a1b51b6717255c4815aead5829c8"
+    },
+    {
+      "name": "vxshot_1.0.0_macos_silicon.dmg",
+      "status": 200,
+      "size": 6423790,
+      "sha256": "b8abe8744410b136ecaf3c1b29a108c76dd8db07319a0130940a3c3eab45ace4"
+    },
+    {
+      "name": "vxshot_1.0.0_windows_x64_setup.exe",
+      "status": 200,
+      "size": 3552313,
+      "sha256": "ef492582aa6d10533af9b39e5a40ca202bab3b9406b29dd0aac5cb2b22a363e4"
+    }
+  ],
+  "publish_run_id": 40480258911
+}

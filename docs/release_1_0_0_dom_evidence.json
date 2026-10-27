@@ -1,0 +1,10 @@
+{
+  "actual_react_app": true,
+  "bridge": "fixture mocks, not native IPC",
+  "startup_reads": 1,
+  "annotation_survives_focus_and_shortcut": true,
+  "annotation_history_survives_save_dialog_focus": true,
+  "unsaved_blocks_updater": true,
+  "export_png_bytes": 3524,
+  "native_runtime": false
+}

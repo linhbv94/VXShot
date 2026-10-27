@@ -91,3 +91,57 @@ fn malformed_export_preserves_existing_file() {
     assert_eq!(std::fs::read(&path).unwrap(), b"original");
     assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(),1);
 }
+
+fn fixture_png(width: u32, height: u32) -> Vec<u8> {
+    let mut out = std::io::Cursor::new(Vec::new());
+    image::RgbaImage::from_pixel(width, height, image::Rgba([17, 51, 99, 128]))
+        .write_to(&mut out, image::ImageFormat::Png).unwrap();
+    out.into_inner()
+}
+
+#[test]
+fn png_alpha_and_dimensions_roundtrip() {
+    let bytes = fixture_png(4, 3);
+    let img = crate::clipboard::decode_bounded_image(&bytes).unwrap().to_rgba8();
+    assert_eq!(img.dimensions(), (4, 3));
+    assert!(img.pixels().all(|p| p.0 == [17, 51, 99, 128]));
+}
+
+#[test]
+fn file_decoder_rejects_overwide_image_and_empty_data() {
+    assert!(crate::clipboard::decode_bounded_image(&fixture_png(8193, 1)).is_err());
+    assert!(crate::clipboard::decode_bounded_image(&[]).is_err());
+}
+
+#[test]
+fn atomic_replace_valid_image_preserves_exact_pixels_and_cleans_staging() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("output.png");
+    std::fs::write(&path, b"old").unwrap();
+    let bytes = fixture_png(4, 3);
+    crate::fs::atomic_save_image_file(crate::types::SaveFileOptions {file_path:path.to_string_lossy().into(),image_bytes:bytes.clone(),format:crate::types::ExportFormat::Png}).unwrap();
+    assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(),1);
+}
+
+#[test]
+fn export_format_mismatch_preserves_destination() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("output.jpg");
+    std::fs::write(&path, b"keep").unwrap();
+    assert!(crate::fs::atomic_save_image_file(crate::types::SaveFileOptions {file_path:path.to_string_lossy().into(),image_bytes:fixture_png(4,3),format:crate::types::ExportFormat::Jpeg}).is_err());
+    assert_eq!(std::fs::read(&path).unwrap(), b"keep");
+}
+
+#[cfg(unix)]
+#[test]
+fn export_refuses_symlink_without_modifying_target() {
+    let dir = tempfile::tempdir().unwrap();
+    let original = dir.path().join("original.png");
+    std::fs::write(&original,b"keep").unwrap();
+    let link = dir.path().join("link.png");
+    std::os::unix::fs::symlink(&original, &link).unwrap();
+    assert!(crate::fs::atomic_save_image_file(crate::types::SaveFileOptions {file_path:link.to_string_lossy().into(),image_bytes:fixture_png(4,3),format:crate::types::ExportFormat::Png}).is_err());
+    assert_eq!(std::fs::read(&original).unwrap(),b"keep");
+    assert!(std::fs::symlink_metadata(&link).unwrap().file_type().is_symlink());
+}
