@@ -30,7 +30,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onOpenFile, onPaste }) =
       </h2>
 
       <p className="text-xs text-slate-400 leading-relaxed mb-6 max-w-sm">
-        Chụp màn hình bằng phím tắt hệ thống (<kbd className="font-mono bg-slate-800 px-1 py-0.5 rounded text-slate-300">Cmd+Shift+4</kbd> trên Mac hoặc <kbd className="font-mono bg-slate-800 px-1 py-0.5 rounded text-slate-300">Win+Shift+S</kbd> trên Windows) rồi mở lại VXShot để tự nạp ảnh.
+        Chụp màn hình bằng phím tắt hệ thống (<kbd className="font-mono bg-slate-800 px-1 py-0.5 rounded text-slate-300">Ctrl+Cmd+Shift+4</kbd> trên Mac hoặc <kbd className="font-mono bg-slate-800 px-1 py-0.5 rounded text-slate-300">Win+Shift+S</kbd> trên Windows) rồi mở lại VXShot để tự nạp ảnh.
       </p>
 
       <div className="flex items-center gap-3">

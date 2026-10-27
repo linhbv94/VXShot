@@ -1,3 +1,5 @@
+import { appVersion } from '../services/app_updater';
+import { AppUpdates } from './AppUpdates';
 import React, { useState } from 'react';
 import { X, Settings, RefreshCw, Coffee, Heart, ShieldAlert, Sparkles, SlidersHorizontal, ImageIcon } from './icons/Icons';
 import { AppSettings } from '../types/settings';
@@ -255,7 +257,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <h3 className="text-sm font-semibold text-slate-100">Quyền riêng tư & An toàn dữ liệu</h3>
 
                 <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[11px] leading-relaxed">
-                  ✓ <strong>100% Offline-First:</strong> VXShot không thực hiện bất kỳ kết nối mạng nào và không gửi hình ảnh của bạn lên máy chủ đám mây.
+                  ✓ <strong>100% Offline-First:</strong> Ảnh được xử lý trên máy và không tải lên máy chủ. Ứng dụng chỉ kết nối GitHub để kiểm tra và tải cập nhật.
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-slate-900/40 border border-white/[0.06] flex flex-col gap-2">
@@ -270,13 +272,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {activeTab === 'updates' && (
               <div className="flex flex-col gap-4">
                 <h3 className="text-sm font-semibold text-slate-100">Kiểm tra cập nhật</h3>
-                <div className="p-4 rounded-xl bg-slate-900/40 border border-white/[0.06] flex flex-col items-center text-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-1">
-                    <RefreshCw className="w-5 h-5" />
-                  </div>
-                  <span className="font-semibold text-slate-200">Bạn đang sử dụng phiên bản mới nhất</span>
-                  <span className="text-slate-400 text-[11px]">VXShot v1.0.0 (Bản phát hành đầu tiên)</span>
-                </div>
+                <AppUpdates language="vi" />
               </div>
             )}
 
@@ -293,7 +289,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                     <div className="flex flex-col">
                       <span className="font-bold text-sm text-slate-100">VXShot</span>
-                      <span className="text-[11px] text-slate-400 font-mono">Phiên bản 1.0.0 (Phase 1)</span>
+                      <span className="text-[11px] text-slate-400 font-mono">Phiên bản {appVersion}</span>
                     </div>
                   </div>
                   <p className="text-slate-300 text-[11px] leading-relaxed">

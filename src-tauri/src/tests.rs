@@ -25,7 +25,9 @@ mod tests {
     fn test_atomic_save_image_file() {
         let temp_dir = std::env::temp_dir().join(format!("vxshot_test_{}", uuid::Uuid::new_v4()));
         let target_file = temp_dir.join("test_output.png");
-        let fake_bytes = vec![137, 80, 78, 71, 13, 10, 26, 10, 0, 1, 2, 3];
+        let mut cursor = std::io::Cursor::new(Vec::new());
+        image::RgbaImage::from_pixel(2, 2, image::Rgba([12, 34, 56, 78])).write_to(&mut cursor, image::ImageFormat::Png).unwrap();
+        let fake_bytes = cursor.into_inner();
 
         let options = SaveFileOptions {
             file_path: target_file.to_string_lossy().to_string(),
@@ -77,4 +79,15 @@ mod tests {
         assert_eq!(roundtrip.height, 1080);
         assert!(roundtrip.has_alpha);
     }
+}
+
+#[test]
+fn malformed_export_preserves_existing_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("keep.png");
+    std::fs::write(&path, b"original").unwrap();
+    let result = crate::fs::atomic_save_image_file(crate::types::SaveFileOptions { file_path:path.to_string_lossy().into(), image_bytes:vec![1,2,3], format:crate::types::ExportFormat::Png });
+    assert!(result.is_err());
+    assert_eq!(std::fs::read(&path).unwrap(), b"original");
+    assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(),1);
 }

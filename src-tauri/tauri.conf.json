@@ -49,6 +49,18 @@
       "nsis": {
         "installMode": "currentUser"
       }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ4QTJGRkYxMjMwM0MyM0MKUldROHdnTWo4ZitpU1BDUW93OUEzTkx0YTdPeVpRQzViYW8zN3lmOE42VXdRVEU0YXU4clFDZ2gK",
+      "endpoints": [
+        "https://github.com/linhbv94/VXShot/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }

@@ -8,7 +8,7 @@ interface BottomStatusBarProps {
   zoom: number;
   statusMessage: string;
   hasImage: boolean;
-  onSaveFile: (format: ExportFormat) => void;
+  onSaveFile: (format?: ExportFormat) => void;
   onCopyResult: () => void;
   isSaving: boolean;
   isCopying: boolean;
@@ -72,7 +72,7 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
             <button
               type="button"
               disabled={!hasImage || isSaving}
-              onClick={() => onSaveFile('png')}
+              onClick={() => onSaveFile()}
               className={`flex items-center gap-1.5 px-3 py-1 font-medium text-slate-200 hover:text-white transition-all active:scale-95 ${
                 !hasImage ? 'opacity-40 cursor-not-allowed' : ''
               }`}
