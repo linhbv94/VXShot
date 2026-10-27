@@ -1,0 +1,324 @@
+import React, { useState } from 'react';
+import {
+  MousePointer,
+  SolidRedactIcon,
+  BlurMosaicIcon,
+  Square,
+  Circle,
+  ArrowUpRight,
+  Minus,
+  Type,
+  ListOrdered,
+  Pencil,
+  Highlighter,
+  Undo2,
+  Redo2,
+  Trash2,
+} from './icons/Icons';
+import { ToolProperties, ToolType } from '../types/canvas';
+
+interface FloatingToolbarProps {
+  activeTool: ToolType;
+  onSelectTool: (tool: ToolType) => void;
+  properties: ToolProperties;
+  onUpdateProperties: (props: Partial<ToolProperties>) => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  hasSelection: boolean;
+  onDeleteSelected: () => void;
+}
+
+const PRESET_COLORS = [
+  { name: 'Đỏ', hex: '#ef4444' },
+  { name: 'Cyan', hex: '#06b6d4' },
+  { name: 'Xanh lục', hex: '#22c55e' },
+  { name: 'Vàng', hex: '#eab308' },
+  { name: 'Trắng', hex: '#ffffff' },
+  { name: 'Đen', hex: '#000000' },
+];
+
+const SOLID_REDACT_COLORS = [
+  { name: 'Đen', hex: '#000000' },
+  { name: 'Xám than', hex: '#1e293b' },
+  { name: 'Trắng', hex: '#ffffff' },
+];
+
+const STROKE_WIDTHS = [2, 4, 8];
+
+export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
+  activeTool,
+  onSelectTool,
+  properties,
+  onUpdateProperties,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  hasSelection,
+  onDeleteSelected,
+}) => {
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  return (
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1.5 select-none">
+      {/* Thanh công cụ chính */}
+      <div className="flex items-center gap-1 px-2 py-1.5 bg-[#13161f]/92 backdrop-blur-md border border-slate-700/70 shadow-2xl rounded-xl">
+        {/* Nhóm Chọn & Che dữ liệu */}
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            title="Chọn đối tượng (V)"
+            onClick={() => onSelectTool('select')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'select'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <MousePointer className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Che nhạy cảm tuyệt đối (B) - Khối che đen 100%"
+            onClick={() => onSelectTool('solid_redact')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'solid_redact'
+                ? 'bg-rose-500/25 text-rose-400 border border-rose-500/50 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <SolidRedactIcon className="w-4 h-4 text-rose-400" />
+          </button>
+
+          <button
+            type="button"
+            title="Làm mờ thông tin (M) - Kính mờ Mosaic / Blur"
+            onClick={() => onSelectTool('blur')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'blur'
+                ? 'bg-purple-500/25 text-purple-400 border border-purple-500/50 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <BlurMosaicIcon className="w-4 h-4 text-purple-400" />
+          </button>
+        </div>
+
+        <div className="w-[1px] h-4 bg-slate-700/70 mx-1" />
+
+        {/* Nhóm Hình & Mũi tên */}
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            title="Khung chữ nhật (R)"
+            onClick={() => onSelectTool('rect')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'rect'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Square className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Hình elip / tròn (O)"
+            onClick={() => onSelectTool('ellipse')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'ellipse'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Circle className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Mũi tên chỉ dẫn (A)"
+            onClick={() => onSelectTool('arrow')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'arrow'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <ArrowUpRight className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Đường thẳng (L)"
+            onClick={() => onSelectTool('line')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'line'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="w-[1px] h-4 bg-slate-700/70 mx-1" />
+
+        {/* Nhóm Viết & Đánh số */}
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            title="Chèn văn bản (T)"
+            onClick={() => onSelectTool('text')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'text'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Type className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Đánh số thứ tự bước (S) - Tự tăng 1, 2, 3..."
+            onClick={() => onSelectTool('step')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'step'
+                ? 'bg-amber-500/25 text-amber-400 border border-amber-500/50 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <ListOrdered className="w-4 h-4 text-amber-400" />
+          </button>
+
+          <button
+            type="button"
+            title="Bút vẽ tự do (P)"
+            onClick={() => onSelectTool('pen')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'pen'
+                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Bút dạ quang tô sáng (H)"
+            onClick={() => onSelectTool('highlight')}
+            className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+              activeTool === 'highlight'
+                ? 'bg-yellow-500/25 text-yellow-300 border border-yellow-500/50 shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Highlighter className="w-4 h-4 text-yellow-300" />
+          </button>
+        </div>
+
+        <div className="w-[1px] h-4 bg-slate-700/70 mx-1" />
+
+        {/* Nhóm Thuộc tính (Màu sắc & Nét vẽ) */}
+        <div className="flex items-center gap-1.5">
+          {activeTool === 'solid_redact' ? (
+            // Chọn màu che Solid Redact
+            <div className="flex items-center gap-1 bg-slate-900/60 p-0.5 rounded-lg border border-slate-700/50">
+              {SOLID_REDACT_COLORS.map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  title={`Che màu ${c.name}`}
+                  onClick={() => onUpdateProperties({ solidRedactColor: c.hex })}
+                  className={`w-4 h-4 rounded-full border transition-transform ${
+                    properties.solidRedactColor === c.hex
+                      ? 'scale-125 border-cyan-400 ring-1 ring-cyan-400'
+                      : 'border-slate-600 hover:scale-110'
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
+          ) : (
+            // Chọn màu vẽ thông thường
+            <div className="flex items-center gap-1 bg-slate-900/60 p-0.5 rounded-lg border border-slate-700/50">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  title={`Màu ${c.name}`}
+                  onClick={() => onUpdateProperties({ color: c.hex })}
+                  className={`w-4 h-4 rounded-full border transition-transform ${
+                    properties.color === c.hex
+                      ? 'scale-125 border-cyan-400 ring-1 ring-cyan-400'
+                      : 'border-slate-600 hover:scale-110'
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Chọn độ dày nét */}
+          <div className="flex items-center gap-0.5 bg-slate-900/60 p-0.5 rounded-lg border border-slate-700/50 text-[11px] font-mono">
+            {STROKE_WIDTHS.map((w) => (
+              <button
+                key={w}
+                type="button"
+                title={`Độ dày ${w}px`}
+                onClick={() => onUpdateProperties({ strokeWidth: w })}
+                className={`px-1.5 py-0.5 rounded transition-colors ${
+                  properties.strokeWidth === w
+                    ? 'bg-cyan-500/20 text-cyan-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {w}p
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="w-[1px] h-4 bg-slate-700/70 mx-1" />
+
+        {/* Nhóm Undo, Redo, Delete */}
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            title="Hoàn tác (Cmd+Z)"
+            disabled={!canUndo}
+            onClick={onUndo}
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            title="Làm lại (Cmd+Shift+Z)"
+            disabled={!canRedo}
+            onClick={onRedo}
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
+
+          {hasSelection && (
+            <button
+              type="button"
+              title="Xóa đối tượng đang chọn (Delete)"
+              onClick={onDeleteSelected}
+              className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors ml-0.5"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

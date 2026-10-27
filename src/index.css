@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden !important;
+    background-color: #0f1117;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+/* Lưới dot grid nền canvas workspace */
+.bg-dot-grid {
+  background-color: #090a0f;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Nền bàn cờ caro cho vùng ảnh trong suốt */
+.bg-transparency-grid {
+  background-color: #141824;
+  background-image: 
+    linear-gradient(45deg, #1c2234 25%, transparent 25%),
+    linear-gradient(-45deg, #1c2234 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1c2234 75%),
+    linear-gradient(-45deg, transparent 75%, #1c2234 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
+/* Scrollbar siêu mảnh 6px chuẩn zTools */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Vùng kéo cửa sổ */
+.titlebar-drag {
+  -webkit-app-region: drag;
+}
+
+.titlebar-no-drag {
+  -webkit-app-region: no-drag;
+}
