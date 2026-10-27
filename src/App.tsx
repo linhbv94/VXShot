@@ -1,3 +1,5 @@
+import { AppUpdates } from './components/AppUpdates';
+import { shouldAutoHydrate, hasUnsavedAnnotations } from './services/editor_session';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Titlebar } from './components/Titlebar';
 import { CanvasWorkspace } from './components/CanvasWorkspace';
@@ -83,6 +85,13 @@ export const App: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const live = useRef({ imagePayload, annotations, settings, isSaving, isCopying });
+  live.current = { imagePayload, annotations, settings, isSaving, isCopying };
+  const savedAnnotations = useRef('[]');
+  const loadSequence = useRef(0);
+  const approveReplace = () => !hasUnsavedAnnotations(live.current.annotations, savedAnnotations.current)
+    || window.confirm('Thay ảnh sẽ bỏ các chú thích chưa lưu hoặc sao chép. Tiếp tục?');
+
   // Tự tính tỉ lệ Fit to Window
   const calculateFitZoom = useCallback((imgWidth: number, imgHeight: number) => {
     const availWidth = window.innerWidth - 60;
@@ -99,13 +108,14 @@ export const App: React.FC = () => {
   // Nạp ảnh và reset trạng thái canvas
   const hydrateImage = useCallback(
     (payload: ClipboardImagePayload, showNotification = true) => {
+      savedAnnotations.current = '[]';
       setImagePayload(payload);
       setAnnotations([]);
       setHistory([[]]);
       setHistoryIndex(0);
       setSelectedId(null);
 
-      const fitZoom = calculateFitZoom(payload.width, payload.height);
+      const fitZoom = live.current.settings.general.fit_window_on_open ? calculateFitZoom(payload.width, payload.height) : 1;
       setViewport({ zoom: fitZoom, pan_x: 0, pan_y: 0 });
       setStatusMessage(`Đã nạp ảnh (${payload.width} × ${payload.height} px)`);
       if (showNotification) {
@@ -120,17 +130,22 @@ export const App: React.FC = () => {
 
   // Đọc clipboard từ Rust
   const fetchClipboard = useCallback(
-    async (showNotification = false) => {
+    async (showNotification = false, automatic = false) => {
+      if (automatic && !shouldAutoHydrate(live.current.settings.general.auto_hydrate_on_open, !!live.current.imagePayload, live.current.isSaving || live.current.isCopying)) return false;
+      const sequence = ++loadSequence.current;
       try {
         const payload = await readClipboardImage();
+        if (sequence !== loadSequence.current) return false;
+        if (automatic && !shouldAutoHydrate(live.current.settings.general.auto_hydrate_on_open, !!live.current.imagePayload, live.current.isSaving || live.current.isCopying)) return false;
         if (payload) {
+          if (!automatic && !approveReplace()) return false;
           hydrateImage(payload, showNotification);
           return true;
         } else if (showNotification) {
           setToast({ message: 'Clipboard chưa có dữ liệu hình ảnh', type: 'info' });
         }
       } catch (err) {
-        console.error('Lỗi đọc clipboard:', err);
+        setToast({ message: `Không đọc được clipboard: ${err}`, type: 'error' });
       }
       return false;
     },
@@ -144,26 +159,29 @@ export const App: React.FC = () => {
       if (storedSettings) {
         setSettings(storedSettings);
       }
-      await fetchClipboard(true);
+      live.current.settings = storedSettings || DEFAULT_SETTINGS;
+      await fetchClipboard(true, true);
     };
     init();
 
+    let disposed = false;
     let unlistenShortcut: (() => void) | undefined;
     let unlistenFocus: (() => void) | undefined;
 
     listenToShortcut(() => {
-      fetchClipboard(false);
+      fetchClipboard(false, true);
     }).then((unlisten) => {
-      unlistenShortcut = unlisten;
+      if (disposed) unlisten(); else unlistenShortcut = unlisten;
     });
 
     listenToWindowFocus(() => {
-      fetchClipboard(false);
+      fetchClipboard(false, true);
     }).then((unlisten) => {
-      unlistenFocus = unlisten;
+      if (disposed) unlisten(); else unlistenFocus = unlisten;
     });
 
     return () => {
+      disposed = true;
       unlistenShortcut?.();
       unlistenFocus?.();
     };
@@ -192,7 +210,9 @@ export const App: React.FC = () => {
   // Mở tệp từ máy tính
   const handleOpenFile = async () => {
     try {
+      const sequence = ++loadSequence.current;
       const payload = await openFileDialog();
+      if (sequence !== loadSequence.current || !approveReplace()) return;
       if (payload) {
         hydrateImage(payload, true);
       }
@@ -200,6 +220,14 @@ export const App: React.FC = () => {
       setToast({ message: `Lỗi mở tệp: ${err}`, type: 'error' });
     }
   };
+
+  useEffect(() => {
+    const protectUpdate = (event: Event) => {
+      if (live.current.isSaving || live.current.isCopying || hasUnsavedAnnotations(live.current.annotations, savedAnnotations.current)) event.preventDefault();
+    };
+    window.addEventListener('vxshot-before-update', protectUpdate);
+    return () => window.removeEventListener('vxshot-before-update', protectUpdate);
+  }, []);
 
   // Thêm Annotation mới và cập nhật History
   const handleAddAnnotation = (newNode: AnnotationNode) => {
@@ -407,6 +435,12 @@ export const App: React.FC = () => {
           ctx.restore();
         }
 
+        // Privacy masks take precedence over every decorative layer, including mosaic.
+        for (const node of annotations) if (node.type === 'SOLID_REDACT') {
+          ctx.fillStyle = node.fill_color;
+          ctx.fillRect(Math.floor(node.x), Math.floor(node.y), Math.ceil(node.x + node.width) - Math.floor(node.x), Math.ceil(node.y + node.height) - Math.floor(node.y));
+        }
+
         // Chuyển sang bytes
         const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
         const quality = format === 'jpeg' ? 0.92 : undefined;
@@ -434,8 +468,9 @@ export const App: React.FC = () => {
   };
 
   // Lưu tệp ảnh ra đĩa
-  const handleSaveFile = async (format: ExportFormat = 'png') => {
-    if (!imagePayload) return;
+  const handleSaveFile = async (format: ExportFormat = settings.editor.default_export_format === 'JPEG' ? 'jpeg' : 'png') => {
+    if (!imagePayload || isSaving || isCopying) return;
+    const exportedAnnotations = JSON.stringify(annotations);
     setIsSaving(true);
     try {
       const timestamp = new Date()
@@ -456,16 +491,19 @@ export const App: React.FC = () => {
         return;
       }
 
-      const imageBytes = await getFlattenedImageBytes(format);
+      const extension = selectedPath.split('.').pop()?.toLowerCase();
+      const actualFormat: ExportFormat = extension === 'jpg' || extension === 'jpeg' ? 'jpeg' : extension === 'png' ? 'png' : format;
+      const imageBytes = await getFlattenedImageBytes(actualFormat);
 
       const saveOptions: SaveFileOptions = {
         file_path: selectedPath,
         image_bytes: imageBytes,
-        format,
+        format: actualFormat,
       };
 
       const result = await saveImageFile(saveOptions);
       if (result.success) {
+        savedAnnotations.current = exportedAnnotations;
         const updatedRecent = [
           selectedPath,
           ...settings.recent_files.filter((p) => p !== selectedPath),
@@ -487,7 +525,8 @@ export const App: React.FC = () => {
 
   // Sao chép thành phẩm vào Clipboard (Copy Result)
   const handleCopyResult = async () => {
-    if (!imagePayload) return;
+    if (!imagePayload || isSaving || isCopying) return;
+    const exportedAnnotations = JSON.stringify(annotations);
     setIsCopying(true);
     try {
       const imageBytes = await getFlattenedImageBytes('png');
@@ -498,6 +537,7 @@ export const App: React.FC = () => {
         has_alpha: imagePayload.has_alpha,
       };
       await writeClipboardImage(payload);
+      savedAnnotations.current = exportedAnnotations;
       setToast({
         message: 'Đã sao chép ảnh có chú thích vào Clipboard! Sẵn sàng dán (Cmd/Ctrl + V) sang Slack, Docs...',
         type: 'success',
@@ -514,6 +554,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+      if (isSettingsOpen) return;
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
@@ -525,7 +566,7 @@ export const App: React.FC = () => {
       // Cmd/Ctrl + S: Lưu tệp
       else if (isCmdOrCtrl && e.key.toLowerCase() === 's' && !e.shiftKey) {
         e.preventDefault();
-        handleSaveFile('png');
+        handleSaveFile();
       }
       // Cmd/Ctrl + Shift + C: Sao chép thành phẩm
       else if (isCmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 'c') {
@@ -596,6 +637,7 @@ export const App: React.FC = () => {
     handleRedo,
     handleDeleteSelected,
     selectedId,
+    isSettingsOpen,
   ]);
 
   return (
@@ -606,7 +648,7 @@ export const App: React.FC = () => {
         onOpenRecentFile={(path) => {
           // Mở recent file
         }}
-        recentFiles={settings.recent_files}
+        recentFiles={[]}
         zoom={viewport.zoom}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
@@ -672,6 +714,8 @@ export const App: React.FC = () => {
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
+
+      <AppUpdates language="vi" notice />
 
       {/* Toast thông báo */}
       {toast && (

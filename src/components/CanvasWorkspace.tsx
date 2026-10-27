@@ -284,6 +284,11 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
       ctx.restore();
     }
+    // Same final privacy pass as exported bitmap; mosaic cannot reveal a solid mask.
+    for (const node of allNodes) if (node.type === 'SOLID_REDACT') {
+      ctx.fillStyle = node.fill_color;
+      ctx.fillRect(Math.floor(node.x), Math.floor(node.y), Math.ceil(node.x + node.width) - Math.floor(node.x), Math.ceil(node.y + node.height) - Math.floor(node.y));
+    }
   }, [annotations, previewNode, selectedId, imagePayload]);
 
   useEffect(() => {

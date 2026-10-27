@@ -239,3 +239,13 @@ Toàn bộ hệ thống đặc tả của VXShot được phân bổ thành 7 t�
 5. [04_api_data.md](04_api_data.md): Giao ước IPC giữa Tauri và WebView, định dạng dữ liệu (JSON Schemas), mô hình Canvas State và ma trận mã lỗi hệ thống.
 6. [05_qa_acceptance.md](05_qa_acceptance.md): Tiêu chuẩn nghiệm thu định dạng Gherkin (Given-When-Then), ma trận kiểm thử biên (Edge Cases), quy tắc validation và QA checklist trên macOS & Windows.
 7. [06_demo_presentation.md](06_demo_presentation.md): Kịch bản trình diễn tính năng (Demo Playbook), 3 Wow Factors, kịch bản thao tác mẫu và phương án dự phòng khi demo.
+
+
+## Baseline phát hành 1.0.0 — QA độc lập 2026-10-27
+
+- Phạm vi thực tế: một ảnh PNG/JPEG nền + annotation Canvas2D, zoom/pan, undo/redo, PNG/JPEG save và copy bitmap. Clipboard/file engine Rust dùng chung macOS/Windows. Multi-image, crop/resize/transform handles và sửa đối tượng sau tạo chưa triển khai; các mục đó trong thiết kế là roadmap, không thuộc nghiệm thu1.0.0.
+- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
+- Save/Copy chụp snapshot annotation, chặn updater trước download nếu còn thay đổi chưa xuất hoặc thao tác đang chạy. Solid redaction vẽ lại ở pass cuối (cả preview/export), làm tròn ra ngoài pixel; mosaic lấy ảnh gốc không được phủ ngược lên vùng che. Màu đen opaque giữ nguyên.
+- File input/export decode giới hạn8192px/33.2MP,64MiB encoded/256MiB decode allocation. Save kiểm format, dùng tempfile create-new cùng volume + sync + atomic persist, cleanup khi lỗi; từ chối đích symlink/thư mục. Chọn PNG/JPEG theo extension trong dialog; file hỏng không ghi đè đích.
+- Settings IPC dùng rename_all snake_case cho new_settings. Updates thật: startup check im lặng khi mạng lỗi, manual retry, available/download/install/restart; không tự install. Chỉ GitHub updater dùng mạng, không upload ảnh. Giữ com.vxshot.desktop, khóa updater riêng, SDK27.0, Win currentUser.
+- Recent menu chưa hoạt động được ẩn; không báo đã có tính năng roadmap. QA runtime và CI/package/public ghi riêng ở release review/evidence.

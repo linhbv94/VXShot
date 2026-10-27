@@ -55,7 +55,7 @@ fn get_app_settings(_state: State<'_, AppState>) -> Result<AppSettings, String> 
     Ok(settings::load_settings())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 fn save_app_settings(
     new_settings: AppSettings,
     _state: State<'_, AppState>,
@@ -149,6 +149,8 @@ fn sync_mac_traffic_lights(window: &tauri::WebviewWindow) {
 pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(AppState {})
         .setup(|app| {

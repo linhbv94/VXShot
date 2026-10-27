@@ -8,6 +8,19 @@ use std::io::Cursor;
 const MAX_DIMENSION: u32 = 8192;
 const MAX_TOTAL_PIXELS: u32 = 33_200_000; // ~ 33.2 Megapixels (8K UHD)
 
+pub fn decode_bounded_image(bytes: &[u8]) -> Result<image::DynamicImage, String> {
+    if bytes.len() > 64 * 1024 * 1024 { return Err("Tệp ảnh vượt giới hạn 64MiB.".into()); }
+    let mut reader = image::ImageReader::new(Cursor::new(bytes)).with_guessed_format().map_err(|e| e.to_string())?;
+    let mut limits = image::Limits::default();
+    limits.max_image_width = Some(MAX_DIMENSION);
+    limits.max_image_height = Some(MAX_DIMENSION);
+    limits.max_alloc = Some(256 * 1024 * 1024);
+    reader.limits(limits);
+    let img = reader.decode().map_err(|e| format!("Ảnh không hợp lệ hoặc quá lớn: {e}"))?;
+    if u64::from(img.width()) * u64::from(img.height()) > u64::from(MAX_TOTAL_PIXELS) { return Err("Ảnh vượt giới hạn 33.2 megapixel.".into()); }
+    Ok(img)
+}
+
 pub fn read_clipboard_image() -> Result<Option<ClipboardImagePayload>, String> {
     let mut clipboard = match Clipboard::new() {
         Ok(c) => c,
@@ -76,7 +89,7 @@ pub fn write_clipboard_image(payload: WriteClipboardPayload) -> Result<(), Strin
     };
 
     // Giải mã mảng bytes thành DynamicImage RGBA
-    let dynamic_img = match image::load_from_memory(&payload.image_bytes) {
+    let dynamic_img = match decode_bounded_image(&payload.image_bytes) {
         Ok(img) => img,
         Err(e) => return Err(format!("Lỗi giải mã ảnh thành phẩm: {e}")),
     };

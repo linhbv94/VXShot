@@ -1,9 +1,9 @@
 use crate::types::{ClipboardImagePayload, SaveDialogOptions, SaveFileOptions, SaveFileResult};
 use base64::Engine;
-use std::fs::{self, File};
+use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use uuid::Uuid;
+
 
 pub fn atomic_save_image_file(options: SaveFileOptions) -> Result<SaveFileResult, String> {
     let target_path = PathBuf::from(&options.file_path);
@@ -17,30 +17,23 @@ pub fn atomic_save_image_file(options: SaveFileOptions) -> Result<SaveFileResult
         }
     }
 
-    // Tạo tên tệp staging tạm cùng thư mục
-    let staging_filename = format!(".vxshot_staging_{}.tmp", Uuid::new_v4());
-    let staging_path = parent_dir.join(&staging_filename);
-
+    if options.image_bytes.is_empty() || options.image_bytes.len() > 64 * 1024 * 1024 {
+        return Err("Dữ liệu ảnh rỗng hoặc vượt giới hạn 64MiB.".into());
+    }
+    let expected = match options.format { crate::types::ExportFormat::Png => image::ImageFormat::Png, crate::types::ExportFormat::Jpeg => image::ImageFormat::Jpeg };
+    if image::guess_format(&options.image_bytes).ok() != Some(expected) {
+        return Err("Dữ liệu ảnh không khớp định dạng xuất.".into());
+    }
+    crate::clipboard::decode_bounded_image(&options.image_bytes)?;
+    if fs::symlink_metadata(&target_path).map(|m| m.file_type().is_symlink() || !m.is_file()).unwrap_or(false) {
+        return Err("Đích lưu phải là tệp thông thường, không phải liên kết hoặc thư mục.".into());
+    }
+    let mut staging = tempfile::Builder::new().prefix(".vxshot_staging_").tempfile_in(parent_dir)
+        .map_err(|e| format!("Không tạo được tệp tạm: {e}"))?;
     let bytes_len = options.image_bytes.len();
-
-    // Ghi dữ liệu vào tệp staging
-    let write_result = (|| -> Result<(), std::io::Error> {
-        let mut file = File::create(&staging_path)?;
-        file.write_all(&options.image_bytes)?;
-        file.sync_all()?;
-        Ok(())
-    })();
-
-    if let Err(e) = write_result {
-        let _ = fs::remove_file(&staging_path);
-        return Err(format!("Lỗi ghi dữ liệu xuống đĩa cứng: {e}"));
-    }
-
-    // Rename nguyên tử sang tệp đích
-    if let Err(e) = fs::rename(&staging_path, &target_path) {
-        let _ = fs::remove_file(&staging_path);
-        return Err(format!("Lỗi cập nhật tệp thành phẩm: {e}"));
-    }
+    staging.write_all(&options.image_bytes).and_then(|_| staging.as_file().sync_all())
+        .map_err(|e| format!("Lỗi ghi dữ liệu: {e}"))?;
+    staging.persist(&target_path).map_err(|e| format!("Không cập nhật được tệp đích: {e}"))?;
 
     Ok(SaveFileResult {
         success: true,
@@ -69,7 +62,7 @@ pub fn open_save_dialog(options: SaveDialogOptions) -> Option<String> {
 
 pub fn open_file_dialog() -> Result<Option<ClipboardImagePayload>, String> {
     let file_path = rfd::FileDialog::new()
-        .add_filter("Hình ảnh", &["png", "jpg", "jpeg", "webp"])
+        .add_filter("Hình ảnh", &["png", "jpg", "jpeg"])
         .pick_file();
 
     let path = match file_path {
@@ -77,12 +70,13 @@ pub fn open_file_dialog() -> Result<Option<ClipboardImagePayload>, String> {
         None => return Ok(None),
     };
 
+    if fs::metadata(&path).map_err(|e| e.to_string())?.len() > 64 * 1024 * 1024 { return Err("Tệp ảnh vượt giới hạn 64MiB.".into()); }
     let bytes = match fs::read(&path) {
         Ok(b) => b,
         Err(e) => return Err(format!("Không thể đọc tệp: {e}")),
     };
 
-    let dynamic_img = match image::load_from_memory(&bytes) {
+    let dynamic_img = match crate::clipboard::decode_bounded_image(&bytes) {
         Ok(img) => img,
         Err(e) => return Err(format!("Định dạng ảnh không được hỗ trợ: {e}")),
     };
