@@ -1,0 +1,17 @@
+{
+  "status": "completed",
+  "conclusion": "success",
+  "head_sha": "0713063158ce476c9beed2d48bf2ac72fb70be41",
+  "url": "https://github.com/linhbv94/VXShot/actions/runs/40486754462",
+  "jobs": [
+    {
+      "name": "publish",
+      "status": "completed",
+      "conclusion": "success",
+      "active": []
+    }
+  ],
+  "repo": "linhbv94/VXShot",
+  "run_id": 40486754462,
+  "observed_at_utc": "2026-10-27T10:13:34.652371+00:00"
+}

@@ -198,7 +198,8 @@
   "post_release_native_followup": {
     "known_issue": "Fast drag can leave a preview mask missing from exported image",
     "patch_version": "1.0.1",
-    "patch_status": "native QA passed, CI pending",
-    "prior_focus_fix": "Save/Cancel history preservation confirmed native"
+    "patch_status": "public 1.0.1 verified, native Mac updater E2E passed",
+    "prior_focus_fix": "Save/Cancel history preservation confirmed native",
+    "patch_url": "https://github.com/linhbv94/VXShot/releases/tag/v1.0.1"
   }
 }

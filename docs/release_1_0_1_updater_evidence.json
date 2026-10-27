@@ -1,0 +1,23 @@
+{
+  "state": "e2e_passed",
+  "platform": "macos_silicon",
+  "before_version": "1.0.0",
+  "identifier": "com.vxshot.desktop",
+  "before_executable_sha256": "b6058656a1d0ffd98d61730d3d92ba1a676e83bb0e1bc756735e0761fc60c994",
+  "before_settings_sha256": "23114d7e373f437dfe80ab77057668f96eaafb886b9a546218998ac41ff120a1",
+  "baseline_ui": "Updater reports current while stable latest is 1.0.0",
+  "scope": "Owned CI bundle fixture; not user installation",
+  "after_version": "1.0.1",
+  "flow": [
+    "manual check found 1.0.1",
+    "native download progress observed",
+    "install and relaunch observed",
+    "About displays 1.0.1",
+    "updater reports current after relaunch"
+  ],
+  "after_executable_sha256": "b8688d9152c2d305aa474947edf97d562c52e9157ee7ceee89c2ae1cc450669b",
+  "matches_verified_ci_package": true,
+  "strict_codesign": true,
+  "settings_byte_exact_preserved": true,
+  "after_settings_sha256": "23114d7e373f437dfe80ab77057668f96eaafb886b9a546218998ac41ff120a1"
+}

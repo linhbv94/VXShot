@@ -1,6 +1,6 @@
 {
-  "status": "queued",
-  "conclusion": "",
+  "status": "completed",
+  "conclusion": "success",
   "head_sha": "0713063158ce476c9beed2d48bf2ac72fb70be41",
   "url": "https://github.com/linhbv94/VXShot/actions/runs/40483406220",
   "jobs": [
@@ -12,16 +12,14 @@
     },
     {
       "name": "build (xcode-27, aarch64-apple-darwin, app,dmg, macos_silicon)",
-      "status": "in_progress",
-      "conclusion": "",
-      "active": [
-        "Rust image/file regression"
-      ]
+      "status": "completed",
+      "conclusion": "success",
+      "active": []
     },
     {
       "name": "build (xcode-27, x86_64-apple-darwin, app,dmg, macos_intel)",
-      "status": "queued",
-      "conclusion": "",
+      "status": "completed",
+      "conclusion": "success",
       "active": []
     },
     {
@@ -29,9 +27,15 @@
       "status": "completed",
       "conclusion": "success",
       "active": []
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "active": []
     }
   ],
   "repo": "linhbv94/VXShot",
   "run_id": 40483406220,
-  "observed_at_utc": "2026-10-27T09:58:57.975646+00:00"
+  "observed_at_utc": "2026-10-27T10:12:18.759412+00:00"
 }

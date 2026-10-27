@@ -1,6 +1,6 @@
 # VXShot — QA và release
 
-Version1.0.0, Windowsx64/macOS Silicon/Intel dùng chung engine clipboard/file Rust. Không có bản dummy. GitHub repo public, standard runners, không cache/artifacts trả phí. Mac SDK27.0, Intel cross-build trênARM runner; chưa GUIWin/Intel.
+Stable 1.0.1 (bản đầu 1.0.0), Windowsx64/macOS Silicon/Intel dùng chung engine clipboard/file Rust. Không có bản dummy. GitHub repo public, standard runners, không cache/artifacts trả phí. Mac SDK27.0, Intel cross-build trênARM runner; chưa GUIWin/Intel.
 
 ## Luồng phát hành
 
@@ -30,3 +30,6 @@ Một ảnh PNG/JPEG nền, annotation, zoom/pan, undo/redo, export PNG/JPEG/cli
 ## Gate hồi quy canvas sau phát hiện native 1.0.0
 
 Khi đổi code vẽ/lưu, phải kiểm một nét kéo nhanh được ghi vào Undo và xuất đúng pixel, bằng actual React fixture hoặc native tương đương; frontend build và ảnh preview không đủ. Vẽ solid mask, thêm mosaic chồng, Save/Cancel rồi Save/Confirm, đọc lại PNG thật để đối chiếu vùng che opaque và alpha ngoài mask. Kiểm Undo/Redo sau lưu. Script qa_editor_session.cjs hiện có chuỗi fast down/move/up và pixel readback; evidence lấy version hiện tại, không ghi đè báo cáo version cũ.
+
+
+Ngày 2026-10-27: updater native Mac Silicon 1.0.0 → 1.0.1 đã đạt download/install/relaunch, executable khớp CI và settings giữ nguyên. Xem [evidence](release_1_0_1_updater_evidence.json). Windows/Intel E2E chưa kiểm.

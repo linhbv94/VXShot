@@ -1,6 +1,6 @@
 {
   "version": "1.0.1",
-  "state": "native_qa_passed_ci_pending",
+  "state": "public_verified",
   "tag": "v1.0.1",
   "sha": "0713063158ce476c9beed2d48bf2ac72fb70be41",
   "build_run_id": 40483406220,
@@ -54,6 +54,174 @@
   "limits": [
     "Windows/Intel GUI not tested",
     "system clipboard Copy not tested",
-    "old-to-new updater E2E not tested"
-  ]
+    "Windows/Intel updater E2E not tested"
+  ],
+  "publish_run_id": 40486754462,
+  "signature_checks": {
+    "version": "1.0.1",
+    "verified": [
+      {
+        "platform": "windows-x86_64",
+        "name": "vxshot_1.0.1_windows_x64_setup.exe",
+        "size": 3547959,
+        "sha256": "7ef04923df5f4b78c3f94afc65bd9b2916e4007caafbb67091ad066a0e14932a",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "windows-x86_64-nsis",
+        "name": "vxshot_1.0.1_windows_x64_setup.exe",
+        "size": 3547959,
+        "sha256": "7ef04923df5f4b78c3f94afc65bd9b2916e4007caafbb67091ad066a0e14932a",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-aarch64",
+        "name": "vxshot_1.0.1_macos_silicon.app.tar.gz",
+        "size": 5891349,
+        "sha256": "2308b11a5cc8e213be390de6660843ba18aa23f3f3a8d215c3001bb5c85e44ce",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-aarch64-app",
+        "name": "vxshot_1.0.1_macos_silicon.app.tar.gz",
+        "size": 5891349,
+        "sha256": "2308b11a5cc8e213be390de6660843ba18aa23f3f3a8d215c3001bb5c85e44ce",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-x86_64",
+        "name": "vxshot_1.0.1_macos_intel.app.tar.gz",
+        "size": 6238037,
+        "sha256": "1edb43480ea53cfaad5749677444bd53fdfb81415ca1225452c0ade72cc3578e",
+        "signature": true,
+        "tamper_rejected": true
+      },
+      {
+        "platform": "darwin-x86_64-app",
+        "name": "vxshot_1.0.1_macos_intel.app.tar.gz",
+        "size": 6238037,
+        "sha256": "1edb43480ea53cfaad5749677444bd53fdfb81415ca1225452c0ade72cc3578e",
+        "signature": true,
+        "tamper_rejected": true
+      }
+    ]
+  },
+  "package_icons": [
+    {
+      "platform": "macos_silicon",
+      "version": "1.0.1",
+      "identifier": "com.vxshot.desktop",
+      "architecture": "0x100000c",
+      "sdk": "27.0",
+      "icns_sha256": "c04d24dd3123f00d9d657a4e5a30b428215c36d56b8dda7f4409537e64709c30",
+      "icon_matches": true,
+      "strict_codesign": true
+    },
+    {
+      "platform": "macos_intel",
+      "version": "1.0.1",
+      "identifier": "com.vxshot.desktop",
+      "architecture": "0x1000007",
+      "sdk": "27.0",
+      "icns_sha256": "c04d24dd3123f00d9d657a4e5a30b428215c36d56b8dda7f4409537e64709c30",
+      "icon_matches": true,
+      "strict_codesign": true
+    },
+    {
+      "platform": "windows_x64",
+      "executable": "vxshot.exe",
+      "pe_machine": "AMD64",
+      "version_resource_contains": "1.0.1",
+      "icon_payloads": 7,
+      "icon_matches": true,
+      "ico_sha256": "80d5f44d7f91fcb86ad8dce6e785f1cc8b41eef24c859e8482ac7c4a94d246b4"
+    }
+  ],
+  "dmg_checks": [
+    {
+      "platform": "macos_silicon",
+      "checksum": "VALID",
+      "dmg_icns_matches": true,
+      "identifier": "com.vxshot.desktop",
+      "version": "1.0.1",
+      "strict_codesign": true
+    },
+    {
+      "platform": "macos_intel",
+      "checksum": "VALID",
+      "dmg_icns_matches": true,
+      "identifier": "com.vxshot.desktop",
+      "version": "1.0.1",
+      "strict_codesign": true
+    }
+  ],
+  "release_id": 425266492,
+  "release_url": "https://github.com/linhbv94/VXShot/releases/tag/v1.0.1",
+  "public_manifest_exact": true,
+  "public_assets": [
+    {
+      "name": "latest.json",
+      "status": 200,
+      "size": 4580,
+      "sha256": "cc4b33c10d7e403212820f95a66f22cabea3a41a2ac6f4957c69ff6581633156"
+    },
+    {
+      "name": "vxshot_1.0.1_macos_intel.app.tar.gz",
+      "status": 200,
+      "size": 6238037,
+      "sha256": "1edb43480ea53cfaad5749677444bd53fdfb81415ca1225452c0ade72cc3578e"
+    },
+    {
+      "name": "vxshot_1.0.1_macos_intel.dmg",
+      "status": 200,
+      "size": 6822450,
+      "sha256": "93148c2cab43d134ff9638a0688b62f146d5007018107a672954c5c83aef1d14"
+    },
+    {
+      "name": "vxshot_1.0.1_macos_silicon.app.tar.gz",
+      "status": 200,
+      "size": 5891349,
+      "sha256": "2308b11a5cc8e213be390de6660843ba18aa23f3f3a8d215c3001bb5c85e44ce"
+    },
+    {
+      "name": "vxshot_1.0.1_macos_silicon.dmg",
+      "status": 200,
+      "size": 6424260,
+      "sha256": "b794fc99071c4126c7c51374317fe3d1f8220ea97125085ca36deff6b7303287"
+    },
+    {
+      "name": "vxshot_1.0.1_windows_x64_setup.exe",
+      "status": 200,
+      "size": 3547959,
+      "sha256": "7ef04923df5f4b78c3f94afc65bd9b2916e4007caafbb67091ad066a0e14932a"
+    }
+  ],
+  "updater_e2e": {
+    "state": "e2e_passed",
+    "platform": "macos_silicon",
+    "before_version": "1.0.0",
+    "identifier": "com.vxshot.desktop",
+    "before_executable_sha256": "b6058656a1d0ffd98d61730d3d92ba1a676e83bb0e1bc756735e0761fc60c994",
+    "before_settings_sha256": "23114d7e373f437dfe80ab77057668f96eaafb886b9a546218998ac41ff120a1",
+    "baseline_ui": "Updater reports current while stable latest is 1.0.0",
+    "scope": "Owned CI bundle fixture; not user installation",
+    "after_version": "1.0.1",
+    "flow": [
+      "manual check found 1.0.1",
+      "native download progress observed",
+      "install and relaunch observed",
+      "About displays 1.0.1",
+      "updater reports current after relaunch"
+    ],
+    "after_executable_sha256": "b8688d9152c2d305aa474947edf97d562c52e9157ee7ceee89c2ae1cc450669b",
+    "matches_verified_ci_package": true,
+    "strict_codesign": true,
+    "settings_byte_exact_preserved": true,
+    "after_settings_sha256": "23114d7e373f437dfe80ab77057668f96eaafb886b9a546218998ac41ff120a1"
+  },
+  "qa_fixture_config_restored": true
 }

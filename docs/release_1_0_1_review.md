@@ -18,4 +18,10 @@ Mở PNG fixture 640 × 400, thêm nhãn số, Save/Cancel và lưu PNG giữ đ
 
 PR2 merged; tag `0713063158ce476c9beed2d48bf2ac72fb70be41`, build run `40483406220`. Tag public 1.0.0 giữ nguyên; bản sửa phát hành dưới số 1.0.1.
 
-Đang chờ CI, kiểm gói và public verification. Windows/Intel GUI chưa kiểm; kiểm updater thực tế sẽ ghi riêng khi có kết quả.
+Build `40483406220` và publish `40486754462` thành công. [Public 1.0.1](https://github.com/linhbv94/VXShot/releases/tag/v1.0.1) là stable/latest; manifest khớp bản đã kiểm, sáu assets HTTP200 không token. Mọi chữ ký/tamper rejection, SDK27.0/kiến trúc/ID/version/icon/codesign hai Mac và hai DMG checksum đạt; Windows x64/version/bảy ICO payload khớp.
+
+## Updater thực tế
+
+Chạy bản CI 1.0.0 trong thư mục fixture riêng, kiểm thấy 1.0.1, bấm Update, quan sát tải/cài/khởi động lại. About hiển thị 1.0.1 và updater báo đang dùng bản mới nhất. Executable sau cập nhật byte-exact với gói CI 1.0.1 đã xác minh, strict codesign đạt; cấu hình byte-exact trước/sau. Đã thoát app fixture và khôi phục cấu hình ban đầu. Không thay bộ cài đang dùng của user.
+
+Windows/Intel GUI và updater E2E chưa kiểm; Copy clipboard hệ thống chưa thử để giữ clipboard cá nhân. Đóng riêng lượt Codex QA bổ sung + patch release sau public/E2E verification.
