@@ -46,10 +46,16 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   const [spacePressed, setSpacePressed] = useState(false);
 
   // Trạng thái vẽ hiện thời
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [drawStart, setDrawStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [currentPoints, setCurrentPoints] = useState<number[]>([]);
-  const [previewNode, setPreviewNode] = useState<AnnotationNode | null>(null);
+  const [isDrawing, setDrawingState] = useState(false);
+  const drawingRef = useRef(false);
+  const setIsDrawing = (value: boolean) => { drawingRef.current = value; setDrawingState(value); };
+  const drawStartRef = useRef({ x: 0, y: 0 });
+  const setDrawStart = (value: {x:number;y:number}) => { drawStartRef.current = value; };
+  const currentPointsRef = useRef<number[]>([]);
+  const setCurrentPoints = (value: number[]) => { currentPointsRef.current = value; };
+  const [previewNode, setPreviewState] = useState<AnnotationNode | null>(null);
+  const previewRef = useRef<AnnotationNode | null>(null);
+  const setPreviewNode = (value: AnnotationNode | null) => { previewRef.current = value; setPreviewState(value); };
 
   // Đếm số bước cho Step Tool
   const nextStepNumber = annotations.filter((a) => a.type === 'STEP_COUNTER').length + 1;
@@ -412,18 +418,18 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       return;
     }
 
-    if (!isDrawing || !imagePayload) return;
+    if (!drawingRef.current || !imagePayload) return;
 
     const { x, y } = getImageCoordinates(e);
 
     if (activeTool === 'pen') {
-      const updated = [...currentPoints, x, y];
+      const updated = [...currentPointsRef.current, x, y];
       setCurrentPoints(updated);
       setPreviewNode({
         id: 'preview',
         type: 'PEN',
-        x: drawStart.x,
-        y: drawStart.y,
+        x: drawStartRef.current.x,
+        y: drawStartRef.current.y,
         points: updated,
         stroke_color: properties.color,
         stroke_width: properties.strokeWidth,
@@ -434,13 +440,13 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
     }
 
     if (activeTool === 'solid_redact') {
-      const w = x - drawStart.x;
-      const h = y - drawStart.y;
+      const w = x - drawStartRef.current.x;
+      const h = y - drawStartRef.current.y;
       setPreviewNode({
         id: 'preview',
         type: 'SOLID_REDACT',
-        x: Math.min(drawStart.x, x),
-        y: Math.min(drawStart.y, y),
+        x: Math.min(drawStartRef.current.x, x),
+        y: Math.min(drawStartRef.current.y, y),
         width: Math.abs(w),
         height: Math.abs(h),
         rotation: 0,
@@ -450,26 +456,26 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         corner_radius: 0,
       });
     } else if (activeTool === 'blur') {
-      const w = x - drawStart.x;
-      const h = y - drawStart.y;
+      const w = x - drawStartRef.current.x;
+      const h = y - drawStartRef.current.y;
       setPreviewNode({
         id: 'preview',
         type: 'BLUR_FILTER',
-        x: Math.min(drawStart.x, x),
-        y: Math.min(drawStart.y, y),
+        x: Math.min(drawStartRef.current.x, x),
+        y: Math.min(drawStartRef.current.y, y),
         width: Math.abs(w),
         height: Math.abs(h),
         z_index: 9999,
         blur_radius: 12,
       });
     } else if (activeTool === 'rect') {
-      const w = x - drawStart.x;
-      const h = y - drawStart.y;
+      const w = x - drawStartRef.current.x;
+      const h = y - drawStartRef.current.y;
       setPreviewNode({
         id: 'preview',
         type: 'RECTANGLE',
-        x: Math.min(drawStart.x, x),
-        y: Math.min(drawStart.y, y),
+        x: Math.min(drawStartRef.current.x, x),
+        y: Math.min(drawStartRef.current.y, y),
         width: Math.abs(w),
         height: Math.abs(h),
         stroke_color: properties.color,
@@ -478,13 +484,13 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         z_index: 9999,
       });
     } else if (activeTool === 'highlight') {
-      const w = x - drawStart.x;
-      const h = y - drawStart.y;
+      const w = x - drawStartRef.current.x;
+      const h = y - drawStartRef.current.y;
       setPreviewNode({
         id: 'preview',
         type: 'HIGHLIGHT',
-        x: Math.min(drawStart.x, x),
-        y: Math.min(drawStart.y, y),
+        x: Math.min(drawStartRef.current.x, x),
+        y: Math.min(drawStartRef.current.y, y),
         width: Math.abs(w),
         height: Math.abs(h),
         stroke_color: properties.color,
@@ -493,10 +499,10 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         z_index: 9999,
       });
     } else if (activeTool === 'ellipse') {
-      const rx = Math.abs(x - drawStart.x) / 2;
-      const ry = Math.abs(y - drawStart.y) / 2;
-      const cx = (drawStart.x + x) / 2;
-      const cy = (drawStart.y + y) / 2;
+      const rx = Math.abs(x - drawStartRef.current.x) / 2;
+      const ry = Math.abs(y - drawStartRef.current.y) / 2;
+      const cx = (drawStartRef.current.x + x) / 2;
+      const cy = (drawStartRef.current.y + y) / 2;
       setPreviewNode({
         id: 'preview',
         type: 'ELLIPSE',
@@ -513,9 +519,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       setPreviewNode({
         id: 'preview',
         type: 'ARROW',
-        x: drawStart.x,
-        y: drawStart.y,
-        points: [drawStart.x, drawStart.y, x, y],
+        x: drawStartRef.current.x,
+        y: drawStartRef.current.y,
+        points: [drawStartRef.current.x, drawStartRef.current.y, x, y],
         stroke_color: properties.color,
         stroke_width: properties.strokeWidth,
         opacity: 1.0,
@@ -525,9 +531,9 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       setPreviewNode({
         id: 'preview',
         type: 'LINE',
-        x: drawStart.x,
-        y: drawStart.y,
-        points: [drawStart.x, drawStart.y, x, y],
+        x: drawStartRef.current.x,
+        y: drawStartRef.current.y,
+        points: [drawStartRef.current.x, drawStartRef.current.y, x, y],
         stroke_color: properties.color,
         stroke_width: properties.strokeWidth,
         opacity: 1.0,
@@ -542,13 +548,14 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       setIsPanning(false);
     }
 
-    if (!isDrawing) return;
+    if (!drawingRef.current) return;
     setIsDrawing(false);
 
-    if (previewNode) {
+    const committedPreview = previewRef.current;
+    if (committedPreview) {
       // Bỏ id preview và gán UUID thật
       const finalNode: AnnotationNode = {
-        ...previewNode,
+        ...committedPreview,
         id: `anno_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         z_index: annotations.length + 1,
       };
@@ -557,6 +564,14 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       onAddAnnotation(finalNode);
     }
   };
+
+  const finishDrawingRef = useRef(handleCanvasMouseUp);
+  finishDrawingRef.current = handleCanvasMouseUp;
+  useEffect(() => {
+    const finish = () => finishDrawingRef.current();
+    window.addEventListener('mouseup', finish);
+    return () => window.removeEventListener('mouseup', finish);
+  }, []);
 
   if (!imagePayload) {
     return (
@@ -580,7 +595,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       onWheel={handleWheel}
       onMouseLeave={() => {
         setIsPanning(false);
-        if (isDrawing) {
+        if (drawingRef.current) {
           setIsDrawing(false);
           setPreviewNode(null);
         }

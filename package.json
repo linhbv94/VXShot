@@ -1,6 +1,6 @@
 {
   "name": "vxshot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "VXShot — Cross-platform Quick Clipboard Image Editor & Annotator",
   "main": "index.js",
   "type": "module",
