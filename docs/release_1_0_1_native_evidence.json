@@ -1,0 +1,39 @@
+{
+  "version": "1.0.1",
+  "native_platform": "macos_silicon",
+  "sdk": "27.0",
+  "fast_drag_history": true,
+  "save_cancel_preserves_history": true,
+  "save_confirm_preserves_history": true,
+  "solid_mask_with_overlapping_mosaic_pixels": 13524,
+  "mask_all_black_opaque": true,
+  "unmasked_alpha": 128,
+  "output_dimensions": [
+    640,
+    400
+  ],
+  "prior_1_0_0_fast_drag_export_mask_missing": true,
+  "undo_redo_after_save": true,
+  "copy_to_system_clipboard": "not tested; personal clipboard preserved",
+  "jpeg": {
+    "magic": "FFD8",
+    "dimensions": [
+      640,
+      400
+    ],
+    "opaque_mask_center": [
+      0,
+      0,
+      0,
+      255
+    ],
+    "white_backed_transparency": [
+      247,
+      167,
+      178,
+      255
+    ]
+  },
+  "settings_snake_case_ipc_persisted": true,
+  "global_shortcut_with_auto_hydrate_enabled_preserves_history": true
+}

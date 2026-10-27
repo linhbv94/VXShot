@@ -194,5 +194,11 @@
       "sha256": "ef492582aa6d10533af9b39e5a40ca202bab3b9406b29dd0aac5cb2b22a363e4"
     }
   ],
-  "publish_run_id": 40480258911
+  "publish_run_id": 40480258911,
+  "post_release_native_followup": {
+    "known_issue": "Fast drag can leave a preview mask missing from exported image",
+    "patch_version": "1.0.1",
+    "patch_status": "native QA passed, CI pending",
+    "prior_focus_fix": "Save/Cancel history preservation confirmed native"
+  }
 }

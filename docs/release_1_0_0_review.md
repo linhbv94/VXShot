@@ -30,3 +30,7 @@ Ngày2026-10-27. User giao QA độc lập trước release, cho phép tạo kh�
 [Release1.0.0](https://github.com/linhbv94/VXShot/releases/tag/v1.0.0), tag e6edf14c99e224b6d755f3c66466ba6a87352961. Build40475261551 attempt2 và publish40480258911 thành công. Public stable/latest manifest exact và6assets HTTP200 không token; state trong evidence là public_verified.
 
 Source runtime giữ đúng tag. Những thay đổi sau tag chỉ thêm tests/QA script/evidence/docs; không đổi runtime đã build. Windows/Intel GUI và old→new updater chưa chạy; không claim native canvas/save pass hoặc full roadmap completion. Tự đóng riêng lượt Codex Shot theo quy ước QA+public verification.
+
+## QA native tiếp theo
+
+User yêu cầu thử lại công cụ. Native Save/Cancel đã xác nhận giữ history, nhưng phát hiện fast drag có thể hiện khối che preview mà chưa ghi vào ảnh xuất. Bản sửa và bằng chứng ở [review 1.0.1](release_1_0_1_review.md); không coi báo cáo public verification trước đó là chứng minh toàn bộ thao tác native đã đạt.

@@ -25,3 +25,8 @@ Native QA vẫn cần mở ảnh fixture, thêm annotations, chuyển app/quay l
 ## Phạm vi1.0.0
 
 Một ảnh PNG/JPEG nền, annotation, zoom/pan, undo/redo, export PNG/JPEG/clipboard. Multi-image/crop/transform/recent-file opener chưa triển khai; không quảng bá đã có.
+
+
+## Gate hồi quy canvas sau phát hiện native 1.0.0
+
+Khi đổi code vẽ/lưu, phải kiểm một nét kéo nhanh được ghi vào Undo và xuất đúng pixel, bằng actual React fixture hoặc native tương đương; frontend build và ảnh preview không đủ. Vẽ solid mask, thêm mosaic chồng, Save/Cancel rồi Save/Confirm, đọc lại PNG thật để đối chiếu vùng che opaque và alpha ngoài mask. Kiểm Undo/Redo sau lưu. Script qa_editor_session.cjs hiện có chuỗi fast down/move/up và pixel readback; evidence lấy version hiện tại, không ghi đè báo cáo version cũ.
