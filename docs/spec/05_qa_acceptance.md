@@ -181,3 +181,8 @@ Feature: Đảm bảo độ sắc nét ảnh xuất không bị ảnh hưởng b
 - File input/export decode giới hạn8192px/33.2MP,64MiB encoded/256MiB decode allocation. Save kiểm format, dùng tempfile create-new cùng volume + sync + atomic persist, cleanup khi lỗi; từ chối đích symlink/thư mục. Chọn PNG/JPEG theo extension trong dialog; file hỏng không ghi đè đích.
 - Settings IPC dùng rename_all snake_case cho new_settings. Updates thật: startup check im lặng khi mạng lỗi, manual retry, available/download/install/restart; không tự install. Chỉ GitHub updater dùng mạng, không upload ảnh. Giữ com.vxshot.desktop, khóa updater riêng, SDK27.0, Win currentUser.
 - Recent menu chưa hoạt động được ẩn; không báo đã có tính năng roadmap. QA runtime và CI/package/public ghi riêng ở release review/evidence.
+
+
+## Hồi quy native 1.0.1 — chốt nét vẽ nhanh
+
+NativeQA1.0.0 xác nhận Save/Cancel giữ annotation/history. Tuy nhiên kéo khối che nhanh có thể chỉ hiện preview mà không commit vào annotations, nên ảnh xuất không chứa mask. Dùng refs đồng bộ cho drawing/start/points/preview, nhận mouseup ở window và consume nét vẽ đúng một lần trước React render. Preview/history/export phải thống nhất; duplicate mouseup không thêm hai đối tượng. Không thay engine clipboard/file, app identity, updater key hoặc SDK.
