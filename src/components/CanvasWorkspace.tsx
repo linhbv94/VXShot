@@ -6,7 +6,9 @@ import {
   ToolType,
   ViewportState,
 } from '../types/canvas';
+import { expansion, hitTest, nodeBounds, translateNode } from '../services/editor_geometry';
 import { EmptyState } from './EmptyState';
+import { AppLanguage, translations } from '../i18n/translations';
 
 interface CanvasWorkspaceProps {
   imagePayload: ClipboardImagePayload | null;
@@ -21,6 +23,8 @@ interface CanvasWorkspaceProps {
   selectedId: string | null;
   onSelectNode: (id: string | null) => void;
   onUpdateAnnotation?: (node: AnnotationNode) => void;
+  onExpandCanvas: (left: number, top: number, right: number, bottom: number) => void;
+  language?: AppLanguage;
 }
 
 export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
@@ -35,12 +39,47 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   onAddAnnotation,
   selectedId,
   onSelectNode,
+  onUpdateAnnotation,
+  onExpandCanvas,
+  language = 'vi',
 }) => {
+  const t = translations[language].canvas;
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const baseImgRef = useRef<HTMLImageElement | null>(null);
 
+  const assets = useRef(new Map<string, HTMLImageElement>());
+  const [assetVersion, setAssetVersion] = useState(0);
+  const dragRef = useRef<{ node: AnnotationNode; x: number; y: number } | null>(null);
+  const resizeRef = useRef<{ x: number; y: number; left: boolean; top: boolean } | null>(null);
+  const [resizePreview, setResizePreview] = useState<ReturnType<typeof expansion> | null>(null);
+  const resizePreviewRef = useRef<ReturnType<typeof expansion> | null>(null);
+  const [textDraft, setTextDraft] = useState<{ x: number; y: number; value: string } | null>(null);
+  useEffect(() => {
+    let disposed = false;
+    const images = annotations.filter(n => n.type === 'IMAGE');
+    const ids = new Set(images.map(n => n.id));
+    for (const id of assets.current.keys()) if (!ids.has(id)) assets.current.delete(id);
+    for (const node of images) if (!assets.current.has(node.id)) {
+      const img = new Image();
+      img.onload = () => { if (!disposed) { assets.current.set(node.id, img); setAssetVersion(v => v + 1); } };
+      img.src = node.data_url;
+    }
+    return () => { disposed = true; };
+  }, [annotations]);
+  const measureText = (text: string, size: number) => {
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return text.length * size * 0.65;
+    ctx.font = `bold ${size}px system-ui, -apple-system, sans-serif`;
+    return ctx.measureText(text).width;
+  };
+  const commitText = () => {
+    if (!textDraft) return;
+    const value = textDraft.value.trim();
+    setTextDraft(null);
+    if (value) onAddAnnotation({ id: crypto.randomUUID(), type: 'TEXT', x: textDraft.x, y: textDraft.y, text: value, font_size: properties.fontSize, font_family: 'system-ui', font_weight: 'bold', fill_color: properties.color, stroke_color: properties.color, stroke_width: 1, opacity: 1, z_index: annotations.length });
+  };
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [spacePressed, setSpacePressed] = useState(false);
@@ -63,7 +102,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   // Lắng nghe phím Space để kích hoạt chế độ Pan
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat && (e.target as HTMLElement).tagName !== 'INPUT') {
+      if (e.code === 'Space' && !e.repeat && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
         setSpacePressed(true);
       }
     };
@@ -120,12 +159,15 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const allNodes = previewNode ? [...annotations, previewNode] : annotations;
+    const allNodes = previewNode ? (dragRef.current ? annotations.map(n => n.id === previewNode.id ? previewNode : n) : [...annotations, previewNode]) : annotations;
 
     for (const node of allNodes) {
       ctx.save();
 
-      if (node.type === 'SOLID_REDACT') {
+      if (node.type === 'IMAGE') {
+        const img = assets.current.get(node.id);
+        if (img) ctx.drawImage(img, node.x, node.y, node.width, node.height);
+      } else if (node.type === 'SOLID_REDACT') {
         // Che thông tin tuyệt đối (100% che kín pixel)
         ctx.fillStyle = node.fill_color;
         ctx.fillRect(node.x, node.y, node.width, node.height);
@@ -146,7 +188,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           const tCtx = tempCanvas.getContext('2d');
           if (tCtx) {
             tCtx.drawImage(
-              baseImgRef.current,
+              canvas,
               node.x,
               node.y,
               node.width,
@@ -270,7 +312,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         ctx.fillStyle = node.fill_color || '#ef4444';
         ctx.font = `bold ${node.font_size || 20}px system-ui, -apple-system, sans-serif`;
         ctx.textBaseline = 'top';
-        ctx.fillText(node.text, node.x, node.y);
+        node.text.split('\n').forEach((line, index) => ctx.fillText(line, node.x, node.y + index * node.font_size * 1.2));
       }
 
       // Viền hiển thị khi đối tượng đang được chọn
@@ -278,13 +320,8 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         ctx.strokeStyle = '#06b6d4';
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
-        if ('width' in node && 'height' in node) {
-          ctx.strokeRect(node.x - 2, node.y - 2, node.width + 4, node.height + 4);
-        } else if (node.type === 'STEP_COUNTER') {
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, (node.radius || 15) + 3, 0, Math.PI * 2);
-          ctx.stroke();
-        }
+        const bounds = nodeBounds(node, measureText);
+        ctx.strokeRect(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
         ctx.setLineDash([]);
       }
 
@@ -295,14 +332,14 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       ctx.fillStyle = node.fill_color;
       ctx.fillRect(Math.floor(node.x), Math.floor(node.y), Math.ceil(node.x + node.width) - Math.floor(node.x), Math.ceil(node.y + node.height) - Math.floor(node.y));
     }
-  }, [annotations, previewNode, selectedId, imagePayload]);
+  }, [annotations, previewNode, selectedId, imagePayload, assetVersion]);
 
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
 
   // Tính tọa độ pixel trên ảnh gốc
-  const getImageCoordinates = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getImageCoordinates = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
@@ -315,7 +352,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   };
 
   // Xử lý MouseDown trên Canvas
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (e.button === 1 || (e.button === 0 && spacePressed)) {
       // Middle click hoặc Space + Click -> Hand Pan
       e.preventDefault();
@@ -326,34 +363,15 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
     if (e.button !== 0 || !imagePayload) return;
 
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
     const { x, y } = getImageCoordinates(e);
 
     // Chế độ Chọn đối tượng (Select Tool)
     if (activeTool === 'select') {
-      // Tìm annotation ở gần con trỏ
-      let foundId: string | null = null;
-      for (let i = annotations.length - 1; i >= 0; i--) {
-        const a = annotations[i];
-        if ('width' in a && 'height' in a) {
-          const w = (a as any).width;
-          const h = (a as any).height;
-          const minX = Math.min(a.x, a.x + w);
-          const maxX = Math.max(a.x, a.x + w);
-          const minY = Math.min(a.y, a.y + h);
-          const maxY = Math.max(a.y, a.y + h);
-          if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-            foundId = a.id;
-            break;
-          }
-        } else if (a.type === 'STEP_COUNTER') {
-          const dist = Math.hypot(x - a.x, y - a.y);
-          if (dist <= (a.radius || 15) + 5) {
-            foundId = a.id;
-            break;
-          }
-        }
-      }
-      onSelectNode(foundId);
+      const found = [...annotations].reverse().find(a => hitTest(a, x, y, 6 / viewport.zoom, measureText));
+      onSelectNode(found?.id ?? null);
+      dragRef.current = found ? { node: found, x, y } : null;
       return;
     }
 
@@ -379,25 +397,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
 
     // Chế độ Nhập văn bản (Text Tool)
     if (activeTool === 'text') {
-      const text = prompt('Nhập nội dung ghi chú:');
-      if (text && text.trim()) {
-        const newNode: AnnotationNode = {
-          id: `text_${Date.now()}`,
-          type: 'TEXT',
-          x,
-          y,
-          text: text.trim(),
-          font_size: properties.fontSize || 20,
-          font_family: 'system-ui',
-          font_weight: 'bold',
-          fill_color: properties.color || '#ef4444',
-          stroke_color: properties.color || '#ef4444',
-          stroke_width: 1,
-          opacity: 1.0,
-          z_index: annotations.length + 1,
-        };
-        onAddAnnotation(newNode);
-      }
+      setTextDraft({ x, y, value: '' });
       return;
     }
 
@@ -408,7 +408,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   };
 
   // Xử lý MouseMove trên Canvas
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (isPanning) {
       onViewportChange({
         ...viewport,
@@ -418,6 +418,11 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       return;
     }
 
+    if (dragRef.current) {
+      const { x, y } = getImageCoordinates(e);
+      setPreviewNode(translateNode(dragRef.current.node, x - dragRef.current.x, y - dragRef.current.y));
+      return;
+    }
     if (!drawingRef.current || !imagePayload) return;
 
     const { x, y } = getImageCoordinates(e);
@@ -548,6 +553,14 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       setIsPanning(false);
     }
 
+    if (dragRef.current) {
+      const original = dragRef.current.node;
+      const moved = previewRef.current;
+      dragRef.current = null;
+      setPreviewNode(null);
+      if (moved && (moved.x !== original.x || moved.y !== original.y)) onUpdateAnnotation?.(moved);
+      return;
+    }
     if (!drawingRef.current) return;
     setIsDrawing(false);
 
@@ -569,14 +582,14 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
   finishDrawingRef.current = handleCanvasMouseUp;
   useEffect(() => {
     const finish = () => finishDrawingRef.current();
-    window.addEventListener('mouseup', finish);
-    return () => window.removeEventListener('mouseup', finish);
+    window.addEventListener('pointerup', finish);
+    return () => window.removeEventListener('pointerup', finish);
   }, []);
 
   if (!imagePayload) {
     return (
       <div className="flex-1 w-full h-full bg-[#090a0f] relative overflow-hidden flex items-center justify-center">
-        <EmptyState onOpenFile={onOpenFile} onPaste={onPasteClipboard} />
+        <EmptyState onOpenFile={onOpenFile} onPaste={onPasteClipboard} language={language} />
       </div>
     );
   }
@@ -594,6 +607,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
       ref={containerRef}
       onWheel={handleWheel}
       onMouseLeave={() => {
+        if (dragRef.current || drawingRef.current) return;
         setIsPanning(false);
         if (drawingRef.current) {
           setIsDrawing(false);
@@ -624,7 +638,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
           {/* Lớp Base Image */}
           <img
             src={imagePayload.data_url}
-            alt="Captured Screen"
+            alt={t.capturedScreenAlt}
             draggable={false}
             style={{
               width: `${imagePayload.width}px`,
@@ -638,19 +652,32 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
             ref={canvasRef}
             width={imagePayload.width}
             height={imagePayload.height}
-            onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
+            onPointerDown={handleCanvasMouseDown}
+            onPointerMove={handleCanvasMouseMove}
+            onPointerUp={handleCanvasMouseUp}
+            onPointerCancel={() => { dragRef.current = null; setIsDrawing(false); setPreviewNode(null); }}
+            style={{ touchAction: 'none' }}
             className="absolute inset-0 z-20 block cursor-inherit"
           />
         </div>
 
+        {textDraft && <textarea autoFocus aria-label={language === 'vi' ? 'Nhập văn bản' : 'Enter text'}
+          value={textDraft.value} onChange={e => setTextDraft({ ...textDraft, value: e.target.value })}
+          onBlur={commitText} onKeyDown={e => { e.stopPropagation(); if (e.key === 'Escape') { e.preventDefault(); setTextDraft(null); } else if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); commitText(); } }}
+          style={{ position: 'absolute', left: textDraft.x, top: textDraft.y, zIndex: 30, minWidth: 160, minHeight: properties.fontSize * 2, font: `bold ${properties.fontSize}px system-ui`, color: properties.color, background: 'var(--surface-base, #0f1117)', border: '1px solid #06b6d4', outline: 'none' }} />}
         {/* Viền bao ranh giới Canvas Frame */}
-        <div className="absolute inset-0 border-2 border-cyan-400/40 pointer-events-none rounded-sm">
-          <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-slate-800 rounded-xs shadow-md" />
-          <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-slate-800 rounded-xs shadow-md" />
-          <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-slate-800 rounded-xs shadow-md" />
-          <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-slate-800 rounded-xs shadow-md" />
+        <div className="absolute inset-0 z-30 border-2 border-cyan-400/40 pointer-events-none rounded-sm">
+          {(['nw', 'ne', 'sw', 'se'] as const).map(corner => <button key={corner}
+            aria-label={language === 'vi' ? `Mở rộng canvas ${corner}` : `Expand canvas ${corner}`}
+            title={language === 'vi' ? 'Kéo ra ngoài để mở rộng canvas' : 'Drag outward to expand canvas'}
+            className="absolute w-3 h-3 bg-white border border-slate-800 rounded-xs shadow-md pointer-events-auto"
+            style={{ top: corner[0] === 'n' ? -6 : undefined, bottom: corner[0] === 's' ? -6 : undefined, left: corner[1] === 'w' ? -6 : undefined, right: corner[1] === 'e' ? -6 : undefined, cursor: corner === 'nw' || corner === 'se' ? 'nwse-resize' : 'nesw-resize', touchAction: 'none' }}
+            onPointerDown={e => { e.stopPropagation(); e.currentTarget.setPointerCapture(e.pointerId); resizeRef.current = { x: e.clientX, y: e.clientY, left: corner[1] === 'w', top: corner[0] === 'n' }; }}
+            onPointerMove={e => { const start = resizeRef.current; if (!start) return; const size = expansion(imagePayload.width, imagePayload.height, (e.clientX - start.x) / viewport.zoom, (e.clientY - start.y) / viewport.zoom, start.left, start.top); resizePreviewRef.current = size; setResizePreview(size); }}
+            onPointerUp={() => { const size = resizePreviewRef.current; resizeRef.current = null; resizePreviewRef.current = null; setResizePreview(null); if (size) onExpandCanvas(size.left, size.top, size.right, size.bottom); }}
+            onPointerCancel={() => { resizeRef.current = null; resizePreviewRef.current = null; setResizePreview(null); }} />)}
+          {resizePreview && <div className="absolute border-2 border-dashed border-cyan-400 pointer-events-none" style={{ left: -resizePreview.left, top: -resizePreview.top, width: imagePayload.width + resizePreview.left + resizePreview.right, height: imagePayload.height + resizePreview.top + resizePreview.bottom }}><span className="bg-slate-900 text-white text-xs">{imagePayload.width + resizePreview.left + resizePreview.right} × {imagePayload.height + resizePreview.top + resizePreview.bottom}</span></div>}
+
         </div>
       </div>
     </div>

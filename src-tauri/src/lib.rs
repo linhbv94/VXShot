@@ -57,10 +57,142 @@ fn get_app_settings(_state: State<'_, AppState>) -> Result<AppSettings, String> 
 
 #[tauri::command(rename_all = "snake_case")]
 fn save_app_settings(
+    app: AppHandle,
     new_settings: AppSettings,
     _state: State<'_, AppState>,
 ) -> Result<(), String> {
-    settings::save_settings(&new_settings)
+    let res = settings::save_settings(&new_settings);
+    #[cfg(target_os = "macos")]
+    rebuild_mac_app_menu(&app, &new_settings.general.language);
+    #[cfg(not(target_os = "macos"))]
+    let _ = app;
+    res
+}
+
+#[tauri::command]
+fn set_app_language(app: AppHandle, lang: String) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    rebuild_mac_app_menu(&app, &lang);
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, lang);
+    Ok(())
+}
+
+#[cfg(target_os = "macos")]
+fn rebuild_mac_app_menu(app: &AppHandle, lang: &str) {
+    use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
+
+    let is_en = lang.trim().eq_ignore_ascii_case("en");
+    let settings_label = if is_en { "Settings…" } else { "Cài đặt…" };
+    let file_menu_label = if is_en { "File" } else { "Tệp" };
+    let open_file_label = if is_en { "Open Image…" } else { "Mở tệp ảnh…" };
+    let save_file_label = if is_en { "Save Image…" } else { "Lưu tệp ảnh…" };
+    let edit_menu_label = if is_en { "Edit" } else { "Chỉnh sửa" };
+    let undo_label = if is_en { "Undo Annotation" } else { "Hoàn tác chú thích" };
+    let redo_label = if is_en { "Redo Annotation" } else { "Làm lại chú thích" };
+    let copy_result_label = if is_en {
+        "Copy Annotated Image"
+    } else {
+        "Sao chép ảnh thành phẩm"
+    };
+    let credits_text = if is_en {
+        "Bùi Việt Linh\nFast clipboard screenshot editor & privacy redactor in the VXUtilities suite.\nGitHub: https://github.com/linhbv94/VXShot"
+    } else {
+        "Bùi Việt Linh\nTiện ích chỉnh sửa, chú thích và che thông tin nhanh ảnh từ clipboard thuộc bộ VXUtilities.\nGitHub: https://github.com/linhbv94/VXShot"
+    };
+
+    let pkg = app.package_info();
+    let about_meta = AboutMetadata {
+        name: Some("VXShot".to_string()),
+        version: Some(pkg.version.to_string()),
+        // Explicit empty build version suppresses AppKit Info.plist fallback.
+        short_version: Some(String::new()),
+        authors: Some(vec!["Bùi Việt Linh".to_string()]),
+        comments: Some(credits_text.to_string()),
+        copyright: Some("© 2026 Bùi Việt Linh. All rights reserved.".to_string()),
+        license: Some("MIT".to_string()),
+        website: Some("https://github.com/linhbv94/VXShot".to_string()),
+        website_label: Some("GitHub — linhbv94/VXShot".to_string()),
+        credits: Some(credits_text.to_string()),
+        icon: Some(tauri::include_image!("icons/icon.png")),
+    };
+
+    if let Ok(settings_item) =
+        MenuItem::with_id(app, "app_settings", settings_label, true, Some("CmdOrCtrl+,"))
+    {
+        if let Ok(app_submenu) = Submenu::with_items(
+            app,
+            "VXShot",
+            true,
+            &[
+                &PredefinedMenuItem::about(app, Some("About VXShot"), Some(about_meta)).unwrap(),
+                &PredefinedMenuItem::separator(app).unwrap(),
+                &settings_item,
+                &PredefinedMenuItem::separator(app).unwrap(),
+                &PredefinedMenuItem::services(app, None).unwrap(),
+                &PredefinedMenuItem::separator(app).unwrap(),
+                &PredefinedMenuItem::hide(app, None).unwrap(),
+                &PredefinedMenuItem::hide_others(app, None).unwrap(),
+                &PredefinedMenuItem::show_all(app, None).unwrap(),
+                &PredefinedMenuItem::separator(app).unwrap(),
+                &PredefinedMenuItem::quit(app, None).unwrap(),
+            ],
+        ) {
+            let open_item =
+                MenuItem::with_id(app, "file_open", open_file_label, true, Some("CmdOrCtrl+O"))
+                    .unwrap();
+            let save_item =
+                MenuItem::with_id(app, "file_save", save_file_label, true, Some("CmdOrCtrl+S"))
+                    .unwrap();
+            let file_submenu = Submenu::with_items(
+                app,
+                file_menu_label,
+                true,
+                &[
+                    &open_item,
+                    &save_item,
+                    &PredefinedMenuItem::separator(app).unwrap(),
+                    &PredefinedMenuItem::close_window(app, None).unwrap(),
+                ],
+            )
+            .unwrap();
+
+            let undo_item =
+                MenuItem::with_id(app, "edit_undo", undo_label, true, Some("CmdOrCtrl+Z")).unwrap();
+            let redo_item =
+                MenuItem::with_id(app, "edit_redo", redo_label, true, Some("CmdOrCtrl+Shift+Z"))
+                    .unwrap();
+            let copy_item = MenuItem::with_id(
+                app,
+                "edit_copy_result",
+                copy_result_label,
+                true,
+                Some("CmdOrCtrl+Shift+C"),
+            )
+            .unwrap();
+            let edit_submenu = Submenu::with_items(
+                app,
+                edit_menu_label,
+                true,
+                &[
+                    &undo_item,
+                    &redo_item,
+                    &PredefinedMenuItem::separator(app).unwrap(),
+                    &copy_item,
+                    &PredefinedMenuItem::separator(app).unwrap(),
+                    &PredefinedMenuItem::cut(app, None).unwrap(),
+                    &PredefinedMenuItem::copy(app, None).unwrap(),
+                    &PredefinedMenuItem::paste(app, None).unwrap(),
+                    &PredefinedMenuItem::select_all(app, None).unwrap(),
+                ],
+            )
+            .unwrap();
+
+            if let Ok(menu) = Menu::with_items(app, &[&app_submenu, &file_submenu, &edit_submenu]) {
+                let _ = app.set_menu(menu);
+            }
+        }
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -156,6 +288,8 @@ pub fn run() {
         .setup(|app| {
             #[cfg(target_os = "macos")]
             {
+                let initial_settings = settings::load_settings();
+                rebuild_mac_app_menu(app.handle(), &initial_settings.general.language);
                 if let Some(main_win) = app.get_webview_window("main") {
                     sync_mac_traffic_lights(&main_win);
                 }
@@ -185,6 +319,32 @@ pub fn run() {
 
             Ok(())
         })
+        .on_menu_event(|app, event| match event.id().as_ref() {
+            "app_settings" => {
+                if let Some(win) = app.get_webview_window("main") {
+                    let _ = win.unminimize();
+                    let _ = win.show();
+                    let _ = win.set_focus();
+                }
+                let _ = app.emit("vxshot://open-settings", ());
+            }
+            "file_open" => {
+                let _ = app.emit("vxshot://menu-open-file", ());
+            }
+            "file_save" => {
+                let _ = app.emit("vxshot://menu-save-file", ());
+            }
+            "edit_undo" => {
+                let _ = app.emit("vxshot://menu-undo", ());
+            }
+            "edit_redo" => {
+                let _ = app.emit("vxshot://menu-redo", ());
+            }
+            "edit_copy_result" => {
+                let _ = app.emit("vxshot://menu-copy-result", ());
+            }
+            _ => {}
+        })
         .on_window_event(|window, event| {
             #[cfg(target_os = "macos")]
             {
@@ -213,7 +373,8 @@ pub fn run() {
             save_image_file,
             open_file_dialog,
             get_app_settings,
-            save_app_settings
+            save_app_settings,
+            set_app_language
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

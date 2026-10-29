@@ -51,6 +51,7 @@ export type ToolType =
   | 'step';
 
 export type AnnotationType =
+  | 'IMAGE'
   | 'RECTANGLE'
   | 'ELLIPSE'
   | 'ARROW'
@@ -141,7 +142,15 @@ export interface BlurFilterNode {
   blur_radius: number;
 }
 
+export interface ImageNode extends BaseAnnotationNode {
+  type: 'IMAGE';
+  data_url: string;
+  width: number;
+  height: number;
+}
+
 export type AnnotationNode =
+  | ImageNode
   | RectAnnotationNode
   | EllipseAnnotationNode
   | ArrowAnnotationNode

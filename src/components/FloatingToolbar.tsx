@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   MousePointer,
   SolidRedactIcon,
@@ -16,6 +16,7 @@ import {
   Trash2,
 } from './icons/Icons';
 import { ToolProperties, ToolType } from '../types/canvas';
+import { AppLanguage, translations } from '../i18n/translations';
 
 interface FloatingToolbarProps {
   activeTool: ToolType;
@@ -28,22 +29,8 @@ interface FloatingToolbarProps {
   onRedo: () => void;
   hasSelection: boolean;
   onDeleteSelected: () => void;
+  language?: AppLanguage;
 }
-
-const PRESET_COLORS = [
-  { name: 'Đỏ', hex: '#ef4444' },
-  { name: 'Cyan', hex: '#06b6d4' },
-  { name: 'Xanh lục', hex: '#22c55e' },
-  { name: 'Vàng', hex: '#eab308' },
-  { name: 'Trắng', hex: '#ffffff' },
-  { name: 'Đen', hex: '#000000' },
-];
-
-const SOLID_REDACT_COLORS = [
-  { name: 'Đen', hex: '#000000' },
-  { name: 'Xám than', hex: '#1e293b' },
-  { name: 'Trắng', hex: '#ffffff' },
-];
 
 const STROKE_WIDTHS = [2, 4, 8];
 
@@ -58,8 +45,24 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   onRedo,
   hasSelection,
   onDeleteSelected,
+  language = 'vi',
 }) => {
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const t = translations[language].toolbar;
+
+  const PRESET_COLORS = [
+    { name: t.colors.red, hex: '#ef4444' },
+    { name: t.colors.cyan, hex: '#06b6d4' },
+    { name: t.colors.green, hex: '#22c55e' },
+    { name: t.colors.yellow, hex: '#eab308' },
+    { name: t.colors.white, hex: '#ffffff' },
+    { name: t.colors.black, hex: '#000000' },
+  ];
+
+  const SOLID_REDACT_COLORS = [
+    { name: t.colors.black, hex: '#000000' },
+    { name: t.colors.charcoal, hex: '#1e293b' },
+    { name: t.colors.white, hex: '#ffffff' },
+  ];
 
   return (
     <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1.5 select-none">
@@ -69,7 +72,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         <div className="flex items-center gap-0.5">
           <button
             type="button"
-            title="Chọn đối tượng (V)"
+            title={t.select}
             onClick={() => onSelectTool('select')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'select'
@@ -82,7 +85,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Che nhạy cảm tuyệt đối (B) - Khối che đen 100%"
+            title={t.solidRedact}
             onClick={() => onSelectTool('solid_redact')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'solid_redact'
@@ -95,7 +98,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Làm mờ thông tin (M) - Kính mờ Mosaic / Blur"
+            title={t.blur}
             onClick={() => onSelectTool('blur')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'blur'
@@ -113,7 +116,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         <div className="flex items-center gap-0.5">
           <button
             type="button"
-            title="Khung chữ nhật (R)"
+            title={t.rect}
             onClick={() => onSelectTool('rect')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'rect'
@@ -126,7 +129,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Hình elip / tròn (O)"
+            title={t.ellipse}
             onClick={() => onSelectTool('ellipse')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'ellipse'
@@ -139,7 +142,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Mũi tên chỉ dẫn (A)"
+            title={t.arrow}
             onClick={() => onSelectTool('arrow')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'arrow'
@@ -152,7 +155,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Đường thẳng (L)"
+            title={t.line}
             onClick={() => onSelectTool('line')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'line'
@@ -170,7 +173,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         <div className="flex items-center gap-0.5">
           <button
             type="button"
-            title="Chèn văn bản (T)"
+            title={t.text}
             onClick={() => onSelectTool('text')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'text'
@@ -183,7 +186,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Đánh số thứ tự bước (S) - Tự tăng 1, 2, 3..."
+            title={t.step}
             onClick={() => onSelectTool('step')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'step'
@@ -196,7 +199,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Bút vẽ tự do (P)"
+            title={t.pen}
             onClick={() => onSelectTool('pen')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'pen'
@@ -209,7 +212,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Bút dạ quang tô sáng (H)"
+            title={t.highlight}
             onClick={() => onSelectTool('highlight')}
             className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
               activeTool === 'highlight'
@@ -232,7 +235,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
                 <button
                   key={c.hex}
                   type="button"
-                  title={`Che màu ${c.name}`}
+                  title={t.redactColorPrefix(c.name)}
                   onClick={() => onUpdateProperties({ solidRedactColor: c.hex })}
                   className={`w-4 h-4 rounded-full border transition-transform ${
                     properties.solidRedactColor === c.hex
@@ -250,7 +253,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
                 <button
                   key={c.hex}
                   type="button"
-                  title={`Màu ${c.name}`}
+                  title={t.colorPrefix(c.name)}
                   onClick={() => onUpdateProperties({ color: c.hex })}
                   className={`w-4 h-4 rounded-full border transition-transform ${
                     properties.color === c.hex
@@ -269,7 +272,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
               <button
                 key={w}
                 type="button"
-                title={`Độ dày ${w}px`}
+                title={t.strokeWidth(w)}
                 onClick={() => onUpdateProperties({ strokeWidth: w })}
                 className={`px-1.5 py-0.5 rounded transition-colors ${
                   properties.strokeWidth === w
@@ -289,7 +292,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         <div className="flex items-center gap-0.5">
           <button
             type="button"
-            title="Hoàn tác (Cmd+Z)"
+            title={t.undo}
             disabled={!canUndo}
             onClick={onUndo}
             className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
@@ -299,7 +302,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
           <button
             type="button"
-            title="Làm lại (Cmd+Shift+Z)"
+            title={t.redo}
             disabled={!canRedo}
             onClick={onRedo}
             className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
@@ -310,7 +313,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           {hasSelection && (
             <button
               type="button"
-              title="Xóa đối tượng đang chọn (Delete)"
+              title={t.deleteSelected}
               onClick={onDeleteSelected}
               className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors ml-0.5"
             >

@@ -40,7 +40,7 @@
   background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
 }
 
-/* Scrollbar siêu mảnh 6px chuẩn zTools */
+/* Scrollbar siêu mảnh 6px chuẩn VXUtilities */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -66,4 +66,49 @@
 
 .titlebar-no-drag {
   -webkit-app-region: no-drag;
+}
+
+/* Chế độ OLED & Light theme overrides */
+html[data-theme="oled"] body,
+html[data-theme="oled"] .vxshot-shell {
+  background-color: #000000 !important;
+  color: #f8fafc;
+}
+
+html[data-theme="oled"] .bg-dot-grid {
+  background-color: #000000 !important;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+}
+
+html[data-theme="light"] body,
+html[data-theme="light"] .vxshot-shell {
+  background-color: #f8fafc !important;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .bg-dot-grid {
+  background-color: #f1f5f9 !important;
+  background-image: radial-gradient(rgba(15, 23, 42, 0.12) 1px, transparent 1px);
+}
+
+[data-vx-settings-section=G2] {padding-top:16px;border-top:1px solid rgba(148,163,184,.2);}
+[data-vx-settings-section=G2] > div:last-child {display:flex;gap:24px;}
+[data-vx-settings-section=G2] [role=radio] {padding:0;background:none;border:0;}
+[data-vx-settings-section=G2] [role=radio] > span:last-child {display:none;}
+
+html[data-theme="light"] [data-vx-settings-modal] {background:#fff;color:#1e293b;border-color:#cbd5e1;}
+html[data-theme="light"] [data-vx-settings-modal] [class*="bg-slate-9"] {background:#f8fafc;}
+html[data-theme="light"] [data-vx-settings-modal] [class*="text-slate-1"],
+html[data-theme="light"] [data-vx-settings-modal] [class*="text-slate-2"],
+html[data-theme="light"] [data-vx-settings-modal] [class*="text-slate-3"] {color:#334155;}
+html[data-theme="light"] [data-vx-settings-modal] [class*="text-cyan-2"],
+html[data-theme="light"] [data-vx-settings-modal] [class*="text-cyan-4"] {color:#0e7490;}
+html[data-theme="light"] [data-vx-settings-modal] [class*="border-white"] {border-color:#cbd5e1;}
+html[data-theme="oled"] [data-vx-settings-modal] {background:#000;}
+
+/* Titlebar font profile: match Media/Photos; do not inherit body antialiasing. */
+[data-vx-titlebar-name] {
+  font: 600 12px/16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: 0;
+  -webkit-font-smoothing: auto;
 }

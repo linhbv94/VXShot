@@ -6,7 +6,7 @@
 > **Ngày cập nhật:** 2026-10-27  
 > **Nền tảng mục tiêu:** macOS (Apple Silicon & Intel) + Windows 11/10 (x64)  
 > **Tài liệu nguồn (Single Source of Scope):** [VXShot_Scope_v1.0.md](../../VXShot_Scope_v1.0.md)  
-> **Quy chuẩn tuân thủ:** [desktop_ui_standards.md](../../../.agents/desktop_ui_standards.md) và [master_theme.md](../../../_summary/master_theme.md)
+> **Quy chuẩn tuân thủ:** [desktop_ui_standards.md](../../../_summary/standard_docs/desktop_ui_standards.md) và [master_theme.md](../../../_summary/standard_docs/master_theme.md)
 
 ---
 
@@ -138,7 +138,7 @@ VXShot là **tiện ích máy tính siêu tốc chuyên chỉnh sửa và xử l
 │ │  [Secondary Action: Save Image (PNG/JPEG)] [Primary: Copy Result]  │ │
 │ └────────────────────────────────────────────────────────────────────┘ │
 │ ┌────────────────────────────────────────────────────────────────────┐ │
-│ │  Settings Modal (Standard zTools Sidebar: General, Canvas, Privacy, │ │
+│ │  Settings Modal (Standard VXUtilities Sidebar: General, Canvas, Privacy, │ │
 │ │  Updates, About, Support Author with VietQR Central Card)          │ │
 │ └────────────────────────────────────────────────────────────────────┘ │
 └───────────────────────────────────┬────────────────────────────────────┘
@@ -199,7 +199,7 @@ Bảng đối chiếu 18 yêu cầu chức năng từ [VXShot_Scope_v1.0.md](../
 - **Mục tiêu then chốt:** Giải quyết dứt điểm Use Case 1 (UC-01) — tải ảnh lên trang web không hỗ trợ dán.
 - **Tính năng triển khai:**
   - Dựng khung dự án Tauri v2 + React 19 + TypeScript + Vite + Tailwind CSS.
-  - Titlebar chuẩn zTools (32px, macOS native traffic lights, Windows `decorations: false`).
+  - Titlebar chuẩn VXUtilities (32px, macOS native traffic lights, Windows `decorations: false`).
   - Lắng nghe phím tắt toàn hệ thống và khởi chạy ứng dụng.
   - Tự động nạp ảnh từ clipboard khi khởi động hoặc nhấn phím tắt.
   - Hộp thoại lưu tệp (`Cmd/Ctrl + S`) hỗ trợ định dạng PNG và JPEG.
@@ -224,7 +224,7 @@ Bảng đối chiếu 18 yêu cầu chức năng từ [VXShot_Scope_v1.0.md](../
   - Quản lý thứ tự xếp chồng (Bring to Front, Send to Back, Move Up, Move Down).
   - Tùy chọn làm mờ phụ (Blur filter - P1).
   - Cắt cúp vùng xuất (Clip to canvas bounds) loại bỏ phần đối tượng tràn ra ngoài.
-  - Bổ sung tab Settings đầy đủ theo chuẩn zTools (Updates, About, Support Author).
+  - Bổ sung tab Settings đầy đủ theo chuẩn VXUtilities (Updates, About, Support Author).
 
 ---
 
@@ -254,3 +254,8 @@ Toàn bộ hệ thống đặc tả của VXShot được phân bổ thành 7 t�
 ## Hồi quy native 1.0.1 — chốt nét vẽ nhanh
 
 NativeQA1.0.0 xác nhận Save/Cancel giữ annotation/history. Tuy nhiên kéo khối che nhanh có thể chỉ hiện preview mà không commit vào annotations, nên ảnh xuất không chứa mask. Dùng refs đồng bộ cho drawing/start/points/preview, nhận mouseup ở window và consume nét vẽ đúng một lần trước React render. Preview/history/export phải thống nhất; duplicate mouseup không thêm hai đối tượng. Không thay engine clipboard/file, app identity, updater key hoặc SDK.
+
+
+## Editor source sau feedback 2026-10-29
+
+Source hiện tại bổ sung IMAGE object độc lập cho ảnh đầu/Paste, nhập Text inline, Select/move mọi object và bốn góc mở rộng canvas. History/dirty/export giữ cả object và kích thước khung; mô tả phạm vi1.0.0 phía trên là lịch sử bản phát hành, không phải phạm vi source mới. Xem [flow](02_feature_flow.md#cập-nhật-nghiệp-vụ-editor-2026-10-29-source-hiện-tại-chưa-release) và [AC](05_qa_acceptance.md#acceptance-cho-feedback-editor-2026-10-29). Chưa release, native platform QA còn cần thực hiện.

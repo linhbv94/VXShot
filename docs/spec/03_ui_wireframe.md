@@ -1,10 +1,34 @@
 # 03. Đặc tả Giao diện & Wireframe — VXShot (`_spec3_ui_wireframe`)
 
-> **Tên sản phẩm:** VXShot (Cross-platform Quick Clipboard Image Editor & Annotator)  
-> **Thư mục tài liệu:** `vxshot/docs/spec/`  
-> **Phiên bản:** 1.0.0  
-> **Ngày cập nhật:** 2026-10-27  
-> **Quy chuẩn tuân thủ nghiêm ngặt:** [desktop_ui_standards.md](../../../.agents/desktop_ui_standards.md) và [master_theme.md](../../../_summary/master_theme.md)
+> **Tên sản phẩm:** VXShot (Cross-platform Quick Clipboard Image Editor & Annotator)
+> **Thư mục tài liệu:** `vxshot/docs/spec/`
+> **Phiên bản:** 1.1.0
+> **Ngày cập nhật:** 2026-10-29
+> **Quy chuẩn tuân thủ nghiêm ngặt:** [index.md](../../../_summary/standard_docs/index.md), [desktop_ui_standards.md](../../../_summary/standard_docs/desktop_ui_standards.md), [master_theme.md](../../../_summary/standard_docs/master_theme.md), [titlebar_standards.md](../../../_summary/standard_docs/titlebar_standards.md), [macos_app_menu_standards.md](../../../_summary/standard_docs/macos_app_menu_standards.md), [settings_standards.md](../../../_summary/standard_docs/settings_standards.md), [bilingual_standards.md](../../../_summary/standard_docs/bilingual_standards.md), [auto_update_standards.md](../../../_summary/standard_docs/auto_update_standards.md)
+
+---
+
+## 0. Bản Đồ Tuân Thủ Hợp Đồng Chuẩn Suite (`TB`, `AM`, `ST`, `BI`, `AU`)
+
+- **Titlebar (`TB-01`..`TB-12`, profile `standard_32`):**
+  - Chiều cao `32px`, trên macOS `padding-left: 82px`, `padding-right: 12px` (không cộng dồn spacer 82px với padding 12px).
+  - Traffic lights native căn tâm tại `x = 14 / 34 / 54`, `y = 15.5` (AppKit `run_on_main_thread` + `standardWindowButton:forStyleMask:` trên SDK 27.0).
+  - Glyph `16 × 16px` tại `x = 82`, gap `6px`, tên `VXShot` tại `x = 104` (`12px`, `font-weight: 600`, `line-height: 16px`, `letter-spacing: 0`), gap `12px` trước nút `Open File`.
+  - Nút Settings icon-only ở cuối hàng bên phải: hitbox `28 × 28px`, icon `16 × 16px`, `border-radius: 6px`, cách mép phải `12px`.
+- **macOS Application Menu (`AM-01`..`AM-14`):**
+  - Menu `VXShot` native gồm: `About VXShot` → separator → `Settings…` / `Cài đặt…` (`⌘,`) → separator → `Services` → separator → `Hide VXShot` / `Hide Others` / `Show All` → separator → `Quit VXShot`.
+  - Native `About VXShot` dùng `AboutMetadata` có tác giả `Bùi Việt Linh` và repo `https://github.com/linhbv94/VXShot` trong `credits`.
+  - Các menu phụ `File` / `Tệp` (`Open Image…`, `Save Image…`) và `Edit` / `Chỉnh sửa` (`Undo`, `Redo`, `Copy Annotated Image`) tự động cập nhật nhãn theo ngôn ngữ `vi`/`en` qua `set_app_language`.
+- **Settings (`ST-01`..`ST-10`):**
+  - Nhóm **Cốt lõi**: `Chung (General)` → `Trình biên tập (Editor)` → `Quyền riêng tư (Privacy)`.
+  - Nhóm **Thông tin & Hỗ trợ**: `Cập nhật (Updates)` → `Giới thiệu (About)` → `Ủng hộ tác giả (Support)`.
+  - Tab **Chung (`General`)** chỉ chứa đúng 2 mục theo thứ tự: `G1 Giao diện & Màu sắc` (4 radio cards 2 cột: `system`, `dark`, `light`, `oled`) → `G2 Ngôn ngữ hiển thị` (`Tiếng Việt`, `English`).
+  - Các tùy chọn `Tự động nạp ảnh từ Clipboard`, `Tự căn chỉnh vừa cửa sổ (Fit to Window)`, `Phím tắt toàn hệ thống` và `Định dạng lưu mặc định` nằm tại tab **Trình biên tập (`Editor`)**.
+  - Footer có `Khôi phục mặc định` (giữ nguyên ngôn ngữ hiện tại) và `Đóng`.
+- **Song ngữ (`BI-01`..`BI-12`):**
+  - Từ điển đầy đủ `vi`/`en` trong `src/i18n/translations.ts`, đồng bộ `localStorage` (`vxshot_lang`, `vxshot_theme`), sự kiện `storage`, và IPC `set_app_language`.
+- **Auto-Update (`AU-01`..`AU-16`):**
+  - Cả card thông báo góc dưới phải (`<AppUpdates language={lang} notice />`) và tab `Settings → Updates` (`<AppUpdates language={lang} />`) dùng chung `useAppUpdater` (`src/services/app_updater.ts`) với nút CTA cập nhật trực tiếp và bảo vệ dữ liệu chưa lưu (`vxshot-before-update`).
 
 ---
 
@@ -31,13 +55,13 @@
 ---
 
 ### 1.2. Quy Chuẩn Thanh Tiêu Đề Trên Cùng (32px Chrome Titlebar)
-Tuân thủ tuyệt đối [desktop_ui_standards.md](../../../.agents/desktop_ui_standards.md):
+Tuân thủ tuyệt đối [desktop_ui_standards.md](../../../_summary/standard_docs/desktop_ui_standards.md):
 - **Chiều cao cố định:** Đúng `32px`.
 - **Phông chữ:** System font (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`), cỡ `12px`.
 - **Tên ứng dụng:** Cỡ `12px`, `font-weight: 600` (Semibold), không dùng phông monospace.
 - **Biểu tượng ứng dụng:** Kích thước `16px × 16px`, khoảng cách (gap) giữa icon và tên app đúng `6px`.
 - **Trên macOS:**
-  - Vùng chừa native traffic lights chuẩn zTools: rộng `82px` (chứa bộ traffic lights native đường kính `12pt`, khoảng cách tâm `20pt`, căn giữa trục dọc `16px`).
+  - Vùng chừa native traffic lights chuẩn VXUtilities: rộng `82px` (chứa bộ traffic lights native đường kính `12pt`, khoảng cách tâm `20pt`, căn giữa trục dọc `16px`).
   - Menu hệ thống nằm hoàn toàn trên Menu Bar của macOS; không chèn hàng menu lặp lại trong cửa sổ app.
 - **Trên Windows:**
   - Vô hiệu hóa hoàn toàn titlebar native của OS (`decorations: false`, không để double titlebar).
@@ -106,7 +130,7 @@ VXShotApp (Root Container: 100vw x 100vh, flex-col, overflow-hidden)
 │       ├── SaveImageDropdownButton (Secondary: "Lưu tệp... (Cmd+S)" [PNG/JPEG])
 │       └── CopyResultPrimaryButton (Primary Electric Cyan: "Sao chép thành phẩm (Cmd+Shift+C)")
 │
-└── SettingsModal (Standard zTools Dialog, Centered, 640px x 480px)
+└── SettingsModal (Standard VXUtilities Dialog, Centered, 640px x 480px)
     ├── ModalHeader (Drag region, "Cài đặt VXShot", Close button)
     ├── ModalBody (Flex row)
     │   ├── SettingsSidebar (General, Editor, Privacy, Updates, About, Support Author)
@@ -189,7 +213,7 @@ VXShotApp (Root Container: 100vw x 100vh, flex-col, overflow-hidden)
 
 ---
 
-### 3.3. Cửa Sổ Cài Đặt Chuẩn zTools (Settings Modal)
+### 3.3. Cửa Sổ Cài Đặt Chuẩn VXUtilities (Settings Modal)
 
 ```text
 +---------------------------------------------------------------------------------------------------+
@@ -215,8 +239,8 @@ VXShotApp (Root Container: 100vw x 100vh, flex-col, overflow-hidden)
 
 ---
 
-### 3.4. Tab Ủng Hộ Tác Giả Chuẩn zTools (Support Author Tab with VietQR Card)
-Tuân thủ nghiêm ngặt mục 37 trong [desktop_ui_standards.md](../../.agents/desktop_ui_standards.md):
+### 3.4. Tab Ủng Hộ Tác Giả Chuẩn VXUtilities (Support Author Tab with VietQR Card)
+Tuân thủ nghiêm ngặt mục 37 trong [desktop_ui_standards.md](../../../_summary/standard_docs/desktop_ui_standards.md):
 - Tông màu ấm amber với biểu tượng tách cà phê (`Coffee`).
 - Lời cảm ơn chân thành từ tác giả **Bùi Việt Linh**.
 - Card mã QR VietQR (Vietcombank) nền trắng sắc nét đặt ở vị trí trung tâm, tối ưu để quét trực tiếp từ app ngân hàng (không hiển thị thủ công số tài khoản dài dòng hay nút copy STK).
@@ -227,7 +251,7 @@ Tuân thủ nghiêm ngặt mục 37 trong [desktop_ui_standards.md](../../.agent
 +---------------------------------------+-----------------------------------------------------------+
 | CẤU HÌNH CỐT LÕI                      | ỦNG HỘ TÁC GIẢ (SUPPORT AUTHOR)                           |
 |                                       |                                                           |
-| [ ] Chung (General)                   | Cảm ơn bạn đã tin dùng VXShot trong bộ công cụ zTools!    |
+| [ ] Chung (General)                   | Cảm ơn bạn đã tin dùng VXShot trong bộ công cụ VXUtilities!    |
 | [ ] Trình biên tập (Editor & Canvas)  | Nếu tiện ích này giúp bạn tiết kiệm thời gian mỗi ngày,   |
 | [ ] Quyền riêng tư (Privacy)          | bạn có thể mời tác giả một tách cà phê ấm áp nhé.         |
 | ------------------------------------- |                                                           |
@@ -282,3 +306,46 @@ The main canvas viewport features a subtle dark dot grid background (#090A0F) wi
 
 At the bottom is a 30px frosted status bar displaying image dimensions "1920 × 1080 px" in monospace font, zoom level "100%", an object counter, and two high-contrast action buttons on the far right: a secondary "Save Image (Cmd+S)" button and an eye-catching primary "Copy Result (Cmd+Shift+C)" button glowing with electric cyan. High desktop density, clean typography, zero clutter.
 ```
+
+
+## Đồng bộ UI suite — Codex tiếp quản ngày2026-10-29
+
+Theo [Settings](../../../_summary/standard_docs/settings_standards.md), [song ngữ](../../../_summary/standard_docs/bilingual_standards.md) và [updater](../../../_summary/standard_docs/auto_update_standards.md). Mục này cập nhật các mô tả cũ trái ranh giới General; không thay engine hoặc tự đánh dấu Specs ready/QA/release.
+
+| Tab / surface | Key / owner | Capability, apply và persist |
+|---|---|---|
+| Chung | `general.theme`, `general.language` | General chỉ Theme→Language; radio có role/aria-checked/name thật; language ngang |
+| Editor | `auto_hydrate_on_open`, `fit_window_on_open`, `global_open` | Các tùy chọn nghiệp vụ rời General; giữ hành vi thật |
+| Settings shell | Header56/sidebar192/footer56 | Panel h560 boundedviewport; body min-height0 để footer không bị cắt ở440px |
+
+Bridge listener có browser guard; không gọi Tauri transformCallback ngoài native. Chọn light đổi Settings surface/text; OLED dùng nền đen. Build/browser không thay native capture/export/OS permissions QA.
+
+Bằng chứng/checks và giới hạn: [báo cáo Codex](../../../_summary/agents_handoff/suite_ui_codex_20261029_result.md). ST/BI/AU/TB native acceptance chỉ đạt khi có evidence phù hợp; source/build không tự đạt runtime.
+
+
+## Editor theo feedback 2026-10-29
+
+Bản source dùng Canvas2D: bốn handle ở góc khung (NW/NE/SW/SE), có tooltip vi/en và con trỏ resize; handle bắt pointer phía trên lớp canvas, drag hiển thị viền preview và W×H. Chỉ mở rộng khung, không biến dạng ảnh/object. Text dùng textarea tại tọa độ click với màu/cỡ chữ công cụ; Enter/blur chốt, Shift+Enter xuống dòng, Escape hủy. Select có bounds cho mọi loại object và kéo trực tiếp, không có transformer resize object trong đợt này. Xem [flow hiện hành](02_feature_flow.md#cập-nhật-nghiệp-vụ-editor-2026-10-29-source-hiện-tại-chưa-release).
+
+
+## Feedback20261029 — Settings component dùng chung
+
+- Căn cứ: [feedback user](../../../_summary/feedback.md) và [Settings contract](../../../_summary/standard_docs/settings_standards.md). Title VXabc Settings không icon; commonvisual/copy lấy VXMedia.
+- Source dùng lại: [canonical React](../../../_summary/standard_codes/settings_ui/settings_ui.tsx), vendorlocal `src/components/shared/settings_ui.tsx` + CSS + SHAmanifest (Clean ở desktop/src); không runtimeimport sibling.
+- Windowapp dùng shell672×560, header/footer56/sidebar192/body24; maxheight theo viewport. General chỉ2sectionTheme→Language, chỉcapability thật. Updates/About/Support dùngcomponent; version/repo/description/icon/QR làmetadata riêng, tabnghiệpvụ vàconfig/updaterguards giữadapter hiệncó.
+- Nghiệmthu riêng: commoncopy/geometry vi-en, theme/localeapply+readback, radio/tabkeyboard/focustrap/Escape, body cuộn/footerkhôngche; native/Windows/packaged/E2E phải ghi evidence, build/hashPASSkhông tựđạt. About native thamchiếuSearch, khác AboutSettings.
+
+
+### Windows menu trong feedback20261029
+
+Sau SVG+tên app là File (Open File, Settings) và View (Zoom In/Out/Actual Size/Fit). Các action gọi callback editor hiện hữu; không thêm Edit/Help rỗng, không đổi paste/history/business. Gear ở trước đúng một cụm minimize/maximize/close. Menu không xuất hiện trên Mac. Chrome DOM đã kiểm tại1100/720px; native Windows/keyboard Alt/drag còn cần QA.
+
+About native dùng credits theo thứ tự tác giả → mô tả → GitHub và không lặp short version bằng semver. Không thay tên/version/identity/signing của app.
+
+
+### Đính chính titlebar 2026-10-30
+Tên app theo hợp đồng root: system font12/600/line16, smoothing auto như Media/Photos; không kế thừa body antialiased. Open File dùng nút liền icon/nhãn/chevron theo Media, hover/focus recent5 và click mở picker.
+
+
+### About native — đính chính 2026-10-30
+Theo hợp đồng menu/About root: PNG trong suốt512×512 riêng app (không Dock squircle/default32), layout AppKit theo Search. Credits: Bùi Việt Linh → mô tả vi/en → GitHub URL; footer © 2026 Bùi Việt Linh. All rights reserved. Giữ version thật, không lặp build version. Cần QA bundle/native mới; không coi cargo check là visual PASS.

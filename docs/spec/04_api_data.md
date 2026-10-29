@@ -484,8 +484,13 @@ erDiagram
 ## Baseline phát hành 1.0.0 — QA độc lập 2026-10-27
 
 - Phạm vi thực tế: một ảnh PNG/JPEG nền + annotation Canvas2D, zoom/pan, undo/redo, PNG/JPEG save và copy bitmap. Clipboard/file engine Rust dùng chung macOS/Windows. Multi-image, crop/resize/transform handles và sửa đối tượng sau tạo chưa triển khai; các mục đó trong thiết kế là roadmap, không thuộc nghiệm thu1.0.0.
-- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
+- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Trong bản phát hành1.0.0, Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
 - Save/Copy chụp snapshot annotation, chặn updater trước download nếu còn thay đổi chưa xuất hoặc thao tác đang chạy. Solid redaction vẽ lại ở pass cuối (cả preview/export), làm tròn ra ngoài pixel; mosaic lấy ảnh gốc không được phủ ngược lên vùng che. Màu đen opaque giữ nguyên.
 - File input/export decode giới hạn8192px/33.2MP,64MiB encoded/256MiB decode allocation. Save kiểm format, dùng tempfile create-new cùng volume + sync + atomic persist, cleanup khi lỗi; từ chối đích symlink/thư mục. Chọn PNG/JPEG theo extension trong dialog; file hỏng không ghi đè đích.
 - Settings IPC dùng rename_all snake_case cho new_settings. Updates thật: startup check im lặng khi mạng lỗi, manual retry, available/download/install/restart; không tự install. Chỉ GitHub updater dùng mạng, không upload ảnh. Giữ com.vxshot.desktop, khóa updater riêng, SDK27.0, Win currentUser.
 - Recent menu chưa hoạt động được ẩn; không báo đã có tính năng roadmap. QA runtime và CI/package/public ghi riêng ở release review/evidence.
+
+
+## Model editor hiện hành 2026-10-29
+
+IMAGE là thành viên `AnnotationNode` trong `src/types/canvas.ts`, gồm id/type/data_url/x/y/width/height/z_index và thuộc tính base; thứ tự mảng là thứ tự vẽ. Ảnh đầu cũng là IMAGE, nền canvas chỉ giữ alpha/kích thước. History entry `{ nodes: AnnotationNode[], image: ClipboardImagePayload | null }` giữ kích thước và các object cùng lúc. `translateNode` dịch cả x/y và từng điểm tuyệt đối của line/arrow/pen; resize khung trái/trên dùng cùng hàm này. Preview drag không sửa document, pointerup mới commit. Export preload toàn bộ IMAGE rồi vẽ theo thứ tự; blur lấy composite bên dưới, solid mask được vẽ lại ở pass cuối bảo đảm opaque. Không đổi Rust IPC hay dữ liệu settings.

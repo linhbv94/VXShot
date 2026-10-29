@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, ClipboardCheck, ChevronDown, ImageIcon } from './icons/Icons';
 import { ExportFormat } from '../types/canvas';
+import { AppLanguage, translations } from '../i18n/translations';
 
 interface BottomStatusBarProps {
   width: number;
@@ -12,6 +13,7 @@ interface BottomStatusBarProps {
   onCopyResult: () => void;
   isSaving: boolean;
   isCopying: boolean;
+  language?: AppLanguage;
 }
 
 export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
@@ -24,7 +26,9 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
   onCopyResult,
   isSaving,
   isCopying,
+  language = 'vi',
 }) => {
+  const t = translations[language].statusBar;
   const [showSaveDropdown, setShowSaveDropdown] = useState(false);
   const saveDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +56,7 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
 
         {/* Tỷ lệ thu phóng */}
         <div className="text-slate-400">
-          Zoom: <span className="text-slate-200 font-semibold">{Math.round(zoom * 100)}%</span>
+          {t.zoom} <span className="text-slate-200 font-semibold">{Math.round(zoom * 100)}%</span>
         </div>
 
         {/* Thông báo trạng thái */}
@@ -76,10 +80,10 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1 font-medium text-slate-200 hover:text-white transition-all active:scale-95 ${
                 !hasImage ? 'opacity-40 cursor-not-allowed' : ''
               }`}
-              title="Lưu tệp ảnh PNG (Cmd/Ctrl + S)"
+              title={t.savePngTitle}
             >
               <Download className="w-3.5 h-3.5 text-slate-300" />
-              <span>{isSaving ? 'Đang lưu...' : 'Lưu tệp...'}</span>
+              <span>{isSaving ? t.saving : t.saveFile}</span>
               <kbd className="hidden md:inline-block ml-1 px-1 py-0.2 text-[9px] bg-slate-900/60 text-slate-400 rounded font-mono">
                 Cmd+S
               </kbd>
@@ -89,7 +93,7 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
               disabled={!hasImage || isSaving}
               onClick={() => setShowSaveDropdown(!showSaveDropdown)}
               className="px-1.5 py-1 border-l border-white/[0.08] hover:bg-white/[0.08] text-slate-400 hover:text-white transition-colors"
-              title="Tùy chọn định dạng lưu"
+              title={t.saveFormatOptions}
             >
               <ChevronDown className="w-3 h-3" />
             </button>
@@ -106,8 +110,8 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-cyan-500/15 hover:text-cyan-300 text-slate-200 flex items-center justify-between text-xs transition-colors"
               >
                 <div className="flex flex-col">
-                  <span className="font-semibold">Lưu tệp PNG</span>
-                  <span className="text-[10px] text-slate-400">Giữ kênh trong suốt (Alpha)</span>
+                  <span className="font-semibold">{t.savePngLabel}</span>
+                  <span className="text-[10px] text-slate-400">{t.savePngDesc}</span>
                 </div>
                 <span className="text-[9px] font-mono text-cyan-400">.png</span>
               </button>
@@ -120,8 +124,8 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
                 className="w-full text-left px-3 py-1.5 hover:bg-cyan-500/15 hover:text-cyan-300 text-slate-200 flex items-center justify-between text-xs transition-colors"
               >
                 <div className="flex flex-col">
-                  <span className="font-semibold">Lưu tệp JPEG</span>
-                  <span className="text-[10px] text-slate-400">Nền trắng chuẩn cho web</span>
+                  <span className="font-semibold">{t.saveJpegLabel}</span>
+                  <span className="text-[10px] text-slate-400">{t.saveJpegDesc}</span>
                 </div>
                 <span className="text-[9px] font-mono text-amber-400">.jpg</span>
               </button>
@@ -137,10 +141,10 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-semibold text-white bg-cyan-500 hover:bg-cyan-400 active:scale-95 shadow-md shadow-cyan-500/25 transition-all ${
             !hasImage ? 'opacity-40 cursor-not-allowed bg-slate-700 shadow-none' : ''
           }`}
-          title="Hợp nhất và sao chép ảnh vào clipboard (Cmd/Ctrl + Shift + C)"
+          title={t.copyResultTitle}
         >
           <ClipboardCheck className="w-3.5 h-3.5 text-white" />
-          <span>{isCopying ? 'Đang sao chép...' : 'Sao chép ảnh'}</span>
+          <span>{isCopying ? t.copying : t.copyResult}</span>
           <kbd className="hidden md:inline-block ml-1 px-1 py-0.2 text-[9px] bg-cyan-600/60 text-cyan-100 rounded font-mono">
             Cmd+Shift+C
           </kbd>

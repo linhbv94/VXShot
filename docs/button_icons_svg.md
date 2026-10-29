@@ -1,7 +1,7 @@
 # Danh Mục Biểu Tượng SVG Cho Các Nút Bấm — VXShot
 
 > **Sản phẩm:** VXShot (Cross-platform Quick Clipboard Image Editor & Annotator)  
-> **Thư viện chuẩn:** `lucide-react` (phiên bản chuẩn hóa đồng bộ zTools)  
+> **Thư viện chuẩn:** `lucide-react` (phiên bản chuẩn hóa đồng bộ VXUtilities)  
 > **Thông số kỹ thuật SVG:** `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, `stroke-width="2"`, `stroke-linecap="round"`, `stroke-linejoin="round"`.  
 > **Kích thước chuẩn:** 16px × 16px (Titlebar/Status bar), 18px × 18px (Top Tool HUD), 14px × 14px (Badges & Sub-options).
 

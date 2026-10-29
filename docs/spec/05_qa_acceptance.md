@@ -155,7 +155,7 @@ Feature: Đảm bảo độ sắc nét ảnh xuất không bị ảnh hưởng b
 
 ### 4.1. Kiểm thử Môi trường macOS (Apple Silicon & Intel)
 - [ ] Chụp màn hình vào clipboard bằng `Cmd + Control + Shift + 4` → Mở app thấy ảnh nạp ngay tức thì.
-- [ ] Kiểm tra thanh Titlebar 32px: Bezel native traffic lights đúng `12pt`, khoảng cách tâm `20pt`, vùng chừa `82px` chuẩn zTools.
+- [ ] Kiểm tra thanh Titlebar 32px: Bezel native traffic lights đúng `12pt`, khoảng cách tâm `20pt`, vùng chừa `82px` chuẩn VXUtilities.
 - [ ] Kiểm tra phím tắt toàn hệ thống `Cmd + Shift + X` kích hoạt app khi đang ẩn dưới nền.
 - [ ] Kiểm tra giữ trọn kênh Alpha đối với ảnh có bo góc cửa sổ macOS (Window Shadow & Rounded Corners).
 - [ ] Thao tác Copy Result và dán sang Apple Notes, Slack, Telegram hiển thị chuẩn xác.
@@ -176,7 +176,7 @@ Feature: Đảm bảo độ sắc nét ảnh xuất không bị ảnh hưởng b
 ## Baseline phát hành 1.0.0 — QA độc lập 2026-10-27
 
 - Phạm vi thực tế: một ảnh PNG/JPEG nền + annotation Canvas2D, zoom/pan, undo/redo, PNG/JPEG save và copy bitmap. Clipboard/file engine Rust dùng chung macOS/Windows. Multi-image, crop/resize/transform handles và sửa đối tượng sau tạo chưa triển khai; các mục đó trong thiết kế là roadmap, không thuộc nghiệm thu1.0.0.
-- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
+- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Trong bản phát hành1.0.0, Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
 - Save/Copy chụp snapshot annotation, chặn updater trước download nếu còn thay đổi chưa xuất hoặc thao tác đang chạy. Solid redaction vẽ lại ở pass cuối (cả preview/export), làm tròn ra ngoài pixel; mosaic lấy ảnh gốc không được phủ ngược lên vùng che. Màu đen opaque giữ nguyên.
 - File input/export decode giới hạn8192px/33.2MP,64MiB encoded/256MiB decode allocation. Save kiểm format, dùng tempfile create-new cùng volume + sync + atomic persist, cleanup khi lỗi; từ chối đích symlink/thư mục. Chọn PNG/JPEG theo extension trong dialog; file hỏng không ghi đè đích.
 - Settings IPC dùng rename_all snake_case cho new_settings. Updates thật: startup check im lặng khi mạng lỗi, manual retry, available/download/install/restart; không tự install. Chỉ GitHub updater dùng mạng, không upload ảnh. Giữ com.vxshot.desktop, khóa updater riêng, SDK27.0, Win currentUser.
@@ -186,3 +186,18 @@ Feature: Đảm bảo độ sắc nét ảnh xuất không bị ảnh hưởng b
 ## Hồi quy native 1.0.1 — chốt nét vẽ nhanh
 
 NativeQA1.0.0 xác nhận Save/Cancel giữ annotation/history. Tuy nhiên kéo khối che nhanh có thể chỉ hiện preview mà không commit vào annotations, nên ảnh xuất không chứa mask. Dùng refs đồng bộ cho drawing/start/points/preview, nhận mouseup ở window và consume nét vẽ đúng một lần trước React render. Preview/history/export phải thống nhất; duplicate mouseup không thêm hai đối tượng. Không thay engine clipboard/file, app identity, updater key hoặc SDK.
+
+
+## Acceptance cho feedback editor 2026-10-29
+
+| ID | Kịch bản và kết quả yêu cầu |
+|---|---|
+| SH-ED-01 | Paste ảnh B lên A: cả hai giữ nguyên bitmap, B được chọn; Select/move/Delete B không thay A; Undo/Redo khôi phục từng thao tác. |
+| SH-ED-02 | Text click mở input thật; gõ tiếng Việt/IME, Enter/blur chốt, Shift+Enter xuống dòng, Escape hủy; text chọn/move/Delete được. |
+| SH-ED-03 | Kéo từng góc ra ngoài ở zoom/pan khác nhau: preview W×H; không scale/crop nội dung; trái/trên dịch mọi object đồng bộ; Undo/Redo khôi phục frame và tọa độ. |
+| SH-ED-04 | Mọi type IMAGE/RECTANGLE/ELLIPSE/ARROW/LINE/PEN/TEXT/STEP_COUNTER/HIGHLIGHT/SOLID_REDACT/BLUR_FILTER hit-test và move được; line không bắt vùng trống trong bounding box; ưu tiên object trên cùng. |
+| SH-ED-05 | Export PNG đọc lại đúng kích thước mới, màu hai ảnh và alpha vùng mở rộng; JPEG có nền trắng; viền selection/handle/textarea không lọt ảnh xuất. |
+| SH-ED-06 | Một nét kéo nhanh vẫn commit, solid mask opaque sau mosaic; focus/native dialog không reset phiên, thay đổi frame cũng chặn updater khi dirty. |
+| SH-ED-07 | Không vượt8192px/chiều hoặc33.2MP khi expand; không nhân history cho từng pointermove; pointer cancel hủy preview. |
+
+Evidence browser fixture và giới hạn platform ghi tại [báo cáo nghiệp vụ](../qa/editor_feedback_20261029.md). Browser/geometry/build không thay native macOS/Windows/clipboard QA; chưa release.

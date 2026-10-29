@@ -66,6 +66,17 @@ export const saveAppSettings = async (newSettings: AppSettings): Promise<void> =
   return invoke<void>('save_app_settings', { new_settings: newSettings });
 };
 
+export const setAppLanguage = async (lang: string): Promise<void> => {
+  if (!isTauriEnvironment()) {
+    return;
+  }
+  try {
+    await invoke<void>('set_app_language', { lang });
+  } catch {
+    // Fallback if not registered in mock
+  }
+};
+
 export const minimizeWindow = async () => {
   if (isTauriEnvironment()) {
     await getCurrentWindow().minimize();
@@ -85,13 +96,57 @@ export const closeWindow = async () => {
 };
 
 export const listenToShortcut = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
   return listen('vxshot://shortcut-triggered', () => {
     callback();
   });
 };
 
 export const listenToWindowFocus = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
   return listen('vxshot://window-focused', () => {
+    callback();
+  });
+};
+
+export const listenToOpenSettings = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
+  return listen('vxshot://open-settings', () => {
+    callback();
+  });
+};
+
+export const listenToMenuOpenFile = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
+  return listen('vxshot://menu-open-file', () => {
+    callback();
+  });
+};
+
+export const listenToMenuSaveFile = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
+  return listen('vxshot://menu-save-file', () => {
+    callback();
+  });
+};
+
+export const listenToMenuCopyResult = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
+  return listen('vxshot://menu-copy-result', () => {
+    callback();
+  });
+};
+
+export const listenToMenuUndo = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
+  return listen('vxshot://menu-undo', () => {
+    callback();
+  });
+};
+
+export const listenToMenuRedo = (callback: () => void): Promise<UnlistenFn> => {
+  if (!isTauriEnvironment()) return Promise.resolve(() => {});
+  return listen('vxshot://menu-redo', () => {
     callback();
   });
 };

@@ -33,3 +33,7 @@ Khi đổi code vẽ/lưu, phải kiểm một nét kéo nhanh được ghi vào
 
 
 Ngày 2026-10-27: updater native Mac Silicon 1.0.0 → 1.0.1 đã đạt download/install/relaunch, executable khớp CI và settings giữ nguyên. Xem [evidence](release_1_0_1_updater_evidence.json). Windows/Intel E2E chưa kiểm.
+
+## Gate editor sau feedback 2026-10-29
+
+Source hiện tại dùng IMAGE object và pointer events, history giữ cả frame. Với phạm vi này dùng `scripts/qa_editor_feedback.mjs` và `scripts/test_editor_geometry.mjs`; xem [evidence và cách chạy](qa/editor_feedback_20261029.md). Script integration legacy một ảnh/mouse events ở trên chưa migrate; không dùng nó hoặc evidence1.0.x cũ để chứng nhận source mới. Native QA vẫn bắt buộc trước release.

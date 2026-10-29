@@ -28,7 +28,7 @@ VXShot là ứng dụng desktop gọn nhẹ được thiết kế tối ưu cho 
 
 - **Core Engine:** Tauri v2 (Rust 2021) — Quản lý clipboard native qua `arboard`, xử lý an toàn bộ nhớ pixel cap 8192px / 33.2MP.
 - **Frontend UI:** React 19 + TypeScript + Tailwind CSS v4.
-- **Thiết kế Giao diện:** Chuẩn zTools Desktop UI Standards (Titlebar 32px tích hợp macOS native traffic lights, dark theme `#0f1117`, Electric Cyan accents).
+- **Thiết kế Giao diện:** Chuẩn VXUtilities Desktop UI Standards (Titlebar 32px tích hợp macOS native traffic lights, dark theme `#0f1117`, Electric Cyan accents).
 
 ---
 

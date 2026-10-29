@@ -1,0 +1,39 @@
+{
+  "actual_react_browser": true,
+  "native": false,
+  "clipboard": "fixture only",
+  "paste_preserves_old_image": true,
+  "independent_move_delete_undo_redo": true,
+  "inline_vietnamese_text": true,
+  "canvas_nw_expansion_and_undo": true,
+  "fast_privacy_drag_and_mosaic_opaque": true,
+  "exported": {
+    "width": 450,
+    "height": 340,
+    "corner": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "green": [
+      0,
+      170,
+      68,
+      255
+    ],
+    "red": [
+      170,
+      0,
+      68,
+      255
+    ],
+    "mask": [
+      0,
+      0,
+      0,
+      255
+    ]
+  },
+  "errors": []
+}

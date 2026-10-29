@@ -344,7 +344,7 @@ stateDiagram-v2
 ## Baseline phát hành 1.0.0 — QA độc lập 2026-10-27
 
 - Phạm vi thực tế: một ảnh PNG/JPEG nền + annotation Canvas2D, zoom/pan, undo/redo, PNG/JPEG save và copy bitmap. Clipboard/file engine Rust dùng chung macOS/Windows. Multi-image, crop/resize/transform handles và sửa đối tượng sau tạo chưa triển khai; các mục đó trong thiết kế là roadmap, không thuộc nghiệm thu1.0.0.
-- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
+- Focus/global shortcut không thay ảnh đã mở. Chỉ tự hydrate canvas trống khi bật auto-hydrate; đọc lại settings trước lần đầu. Trong bản phát hành1.0.0, Paste/Open chủ động hỏi xác nhận nếu annotation khác snapshot vừa Save/Copy; stale clipboard results bị bỏ. Native dialog/focus không reset history.
 - Save/Copy chụp snapshot annotation, chặn updater trước download nếu còn thay đổi chưa xuất hoặc thao tác đang chạy. Solid redaction vẽ lại ở pass cuối (cả preview/export), làm tròn ra ngoài pixel; mosaic lấy ảnh gốc không được phủ ngược lên vùng che. Màu đen opaque giữ nguyên.
 - File input/export decode giới hạn8192px/33.2MP,64MiB encoded/256MiB decode allocation. Save kiểm format, dùng tempfile create-new cùng volume + sync + atomic persist, cleanup khi lỗi; từ chối đích symlink/thư mục. Chọn PNG/JPEG theo extension trong dialog; file hỏng không ghi đè đích.
 - Settings IPC dùng rename_all snake_case cho new_settings. Updates thật: startup check im lặng khi mạng lỗi, manual retry, available/download/install/restart; không tự install. Chỉ GitHub updater dùng mạng, không upload ảnh. Giữ com.vxshot.desktop, khóa updater riêng, SDK27.0, Win currentUser.
@@ -354,3 +354,14 @@ stateDiagram-v2
 ## Hồi quy native 1.0.1 — chốt nét vẽ nhanh
 
 NativeQA1.0.0 xác nhận Save/Cancel giữ annotation/history. Tuy nhiên kéo khối che nhanh có thể chỉ hiện preview mà không commit vào annotations, nên ảnh xuất không chứa mask. Dùng refs đồng bộ cho drawing/start/points/preview, nhận mouseup ở window và consume nét vẽ đúng một lần trước React render. Preview/history/export phải thống nhất; duplicate mouseup không thêm hai đối tượng. Không thay engine clipboard/file, app identity, updater key hoặc SDK.
+
+
+## Cập nhật nghiệp vụ editor 2026-10-29 (source hiện tại, chưa release)
+
+- Canvas là khung xuất độc lập với ảnh. Ảnh đầu và ảnh Paste đều là object IMAGE riêng; không dùng bitmap nền để thay thế nội dung tài liệu.
+- Paste vào tài liệu hiện có thêm IMAGE trên cùng, chọn ảnh mới và chuyển Select; không reset ảnh cũ, annotation hoặc history. Đặt ảnh giữa canvas (tọa độ không âm); giữ nguyên frame nếu ảnh vượt khung và gợi ý kéo góc canvas. Open File vẫn là thay tài liệu có xác nhận khi dirty. Focus/shortcut chỉ hydrate khi trống.
+- Text: click đặt textarea, nhập Unicode/tiếng Việt và IME; Enter hoặc blur chốt, Shift+Enter xuống dòng, Escape hủy. Phím tắt editor/Space không can thiệp textarea. Text đã chốt chọn/move/Delete được.
+- Select duyệt object từ trên xuống; rectangle/image/text dùng bounds, ellipse/step dùng hình học, line/pen dùng khoảng cách segment, arrow tính thêm đầu mũi tên. Tolerance tương ứng 6px màn hình. Mọi object có viền selection và kéo độc lập bằng pointer capture; nhả chuột chốt một history entry. Pointer cancel hủy preview.
+- Bốn góc canvas là handle mở rộng, kéo ra ngoài hiển thị kích thước dự kiến; kéo vào không crop/scale. Kéo trái/trên dịch toàn bộ object cùng offset tương ứng để giữ vị trí tương đối; kéo phải/dưới giữ tọa độ. Frame tối đa8192 mỗi chiều,33.2MP; vượt budget bỏ thao tác. Export cắt đúng frame và giữ alpha PNG, JPEG lót trắng.
+- History lưu đồng thời object và kích thước canvas; Paste/move/text/Delete/expand đều Undo/Redo, thao tác mới sau Undo bỏ nhánh Redo. Dirty so sánh cả object và frame với snapshot đã xuất; update không được vượt dirty guard.
+- Nội dung này thay phạm vi thực thi cũ đối với multi-image, move, text và canvas expansion. Object resize/rotate/crop vẫn chưa triển khai; không diễn giải bốn handle canvas là resize object.

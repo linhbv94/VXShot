@@ -1,6 +1,6 @@
 [package]
 name = "vxshot"
-version = "1.0.1"
+version = "1.0.2"
 description = "VXShot — Cross-platform Quick Clipboard Image Editor & Annotator"
 authors = ["vic"]
 edition = "2021"
@@ -16,7 +16,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = ["devtools"] }
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-opener = "2"
-tauri-plugin-updater = "2"
+tauri-plugin-updater = "=2.14.1"
 tauri-plugin-process = "2"
 tempfile = "3"
 serde = { version = "1", features = ["derive"] }
